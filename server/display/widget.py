@@ -109,7 +109,7 @@ class VerticalBarWidget(Widget):
             bar_height -= bot.size[1]
         self.bar = BarWidget((0, 0), (bar_width, bar_height), (True, False, True, False))
         children = list(filter(None, [top, self.bar, bot]))
-        parent = VerticalLayoutWidget((0, 0), children=children, spacing=4)
+        parent = VerticalLayoutWidget((0, 0), children=children, spacing=0)
         self.mode = mode
         self.value = None
         super().__init__(pos, parent.size, children=[parent])
@@ -125,12 +125,12 @@ class VerticalBarWidget(Widget):
             x_max, y_max = width - 1, height - 1
             v_padding = 2
             rect_x = self.bar.pos[0]
-            rect_y = [y_max, y_max // 2, 0][mode]
+            rect_y = [y_max, y_max // 2, 0][mode] + self.bar.pos[1]
             rect_w = width
-            rect_h = -int((y_max // (v_max - v_min) - 2 * v_padding) * value)
-            if rect_h > 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y + v_padding, rect_w, rect_h))
-            elif rect_h < 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y - v_padding, rect_w, rect_h))
+            rect_h = int((y_max // (v_max - v_min) - 2 * v_padding) * abs(value))
+            if value > 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y - v_padding, rect_w, -rect_h + 1))
+            elif value < 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y + v_padding, rect_w, rect_h + 1))
             if mode == VerticalBarWidget.MODE_CENTER:
                 pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, width, 1))
