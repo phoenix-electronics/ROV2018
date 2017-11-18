@@ -8,11 +8,11 @@ class Widget:
         self.pos = pos
         self.size = size
         self.color = Widget.DEFAULT_COLOR
-        self.surface = pygame.Surface(size)
+        self.surface = pygame.Surface(size, pygame.SRCALPHA)
         self.children = children or []
 
     def blit(self, surface: pygame.Surface) -> None:
-        self.surface.fill((0, 0, 0))
+        self.surface.fill((0, 0, 0, 0))
         self.draw()
         for child in self.children:
             child.blit(self.surface)
@@ -28,7 +28,7 @@ class VerticalLayoutWidget(Widget):
     def __init__(self, pos: (int, int), children: [Widget], alignment: int = ALIGN_CENTER, spacing: int = 0) -> None:
         width, height = 0, 0
         if children:
-            (widths, heights) = zip(*[child.size for child in children])
+            widths, heights = zip(*[child.size for child in children])
             width, height = max(widths), sum(heights) + spacing * (len(children) - 1)
             y_offset = 0
             for index, child in enumerate(children):
@@ -44,7 +44,7 @@ class HorizontalLayoutWidget(Widget):
     def __init__(self, pos: (int, int), children: [Widget], alignment: int = ALIGN_MIDDLE, spacing: int = 0) -> None:
         width, height = 0, 0
         if children:
-            (widths, heights) = zip(*[child.size for child in children])
+            widths, heights = zip(*[child.size for child in children])
             width, height = sum(widths) + spacing * (len(children) - 1), max(heights)
             x_offset = 0
             for index, child in enumerate(children):
@@ -80,14 +80,57 @@ class BarWidget(Widget):
         super().__init__(pos, size)
 
     def draw(self) -> None:
-        (width, height) = self.size
-        border_points = [(x * (width - 1), y * (height - 1)) for x, y in [(0, 0), (1, 0), (1, 1), (0, 1)]]
+        width, height = self.size
+        x_max, y_max = width - 1, height - 1
+        border_points = [(x * x_max, y * y_max) for x, y in [(0, 0), (1, 0), (1, 1), (0, 1)]]
         for side, border in enumerate(self.border):
             if border:
                 point1, point2 = border_points[side], border_points[(side + 1) % 4]
-                pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, point1, point2)
+                pygame.draw.line(self.surface, self.color, point1, point2)
         if self.value is None:
-            size = min(width, height) - 1
-            orig_x, orig_y = ((width - 1 - size) // 2), ((height - 1 - size) // 2)
-            pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, (orig_x, orig_y), (orig_x + size, orig_y + size))
-            pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, (orig_x, orig_y + size), (orig_x + size, orig_y))
+            size = min(x_max, y_max)
+            orig_x, orig_y = (x_max - size) // 2, (y_max - size) // 2
+            pygame.draw.line(self.surface, self.color, (orig_x, orig_y), (orig_x + size, orig_y + size))
+            pygame.draw.line(self.surface, self.color, (orig_x, orig_y + size), (orig_x + size, orig_y))
+
+
+class VerticalBarWidget(Widget):
+    MODE_NORMAL, MODE_CENTER, MODE_INVERT = range(3)
+
+    def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, top_text: str = None,
+                 bot_text: str = None) -> None:
+        bar_width, bar_height = size
+        top, bot = None, None
+        if top_text:
+            top = TextWidget((0, 0), top_text)
+            bar_height -= top.size[1]
+        if bot_text:
+            bot = TextWidget((0, 0), bot_text)
+            bar_height -= bot.size[1]
+        self.bar = BarWidget((0, 0), (bar_width, bar_height), (True, False, True, False))
+        children = list(filter(None, [top, self.bar, bot]))
+        parent = VerticalLayoutWidget((0, 0), children=children, spacing=4)
+        self.mode = mode
+        self.value = None
+        super().__init__(pos, parent.size, children=[parent])
+
+    def draw(self):
+        mode, raw_value = self.mode, self.value
+        self.bar.value = raw_value
+        if raw_value is not None:
+            v_min, v_max = [(0, 1), (-1, 1), (-1, 0)][mode]
+            value = max(v_min, min(v_max, raw_value))
+            surface, color = self.surface, self.color
+            width, height = self.bar.size
+            x_max, y_max = width - 1, height - 1
+            v_padding = 2
+            rect_x = self.bar.pos[0]
+            rect_y = [y_max, y_max // 2, 0][mode]
+            rect_w = width
+            rect_h = -int((y_max // (v_max - v_min) - 2 * v_padding) * value)
+            if rect_h > 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y + v_padding, rect_w, rect_h))
+            elif rect_h < 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y - v_padding, rect_w, rect_h))
+            if mode == VerticalBarWidget.MODE_CENTER:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, width, 1))
