@@ -87,7 +87,7 @@ class BarWidget(Widget):
                 point1, point2 = border_points[side], border_points[(side + 1) % 4]
                 pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, point1, point2)
         if self.value is None:
-            size = min(width - 1, height - 1)
+            size = min(width, height) - 1
             orig_x, orig_y = ((width - 1 - size) // 2), ((height - 1 - size) // 2)
             pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, (orig_x, orig_y), (orig_x + size, orig_y + size))
             pygame.draw.line(self.surface, Widget.DEFAULT_COLOR, (orig_x, orig_y + size), (orig_x + size, orig_y))
