@@ -134,3 +134,45 @@ class VerticalBarWidget(Widget):
                 pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y + v_padding, rect_w, rect_h + 1))
             if mode == VerticalBarWidget.MODE_CENTER:
                 pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, width, 1))
+
+
+class HorizontalBarWidget(Widget):
+    MODE_NORMAL, MODE_CENTER, MODE_INVERT = range(3)
+
+    def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, left_text: str = None,
+                 right_text: str = None) -> None:
+        bar_width, bar_height = size
+        left, right = None, None
+        if left_text:
+            left = TextWidget((0, 0), left_text)
+            bar_width -= left.size[0]
+        if right_text:
+            right = TextWidget((0, 0), right_text)
+            bar_width -= right.size[0]
+        self.bar = BarWidget((0, 0), (bar_width, bar_height), (False, True, False, True))
+        children = list(filter(None, [left, self.bar, right]))
+        parent = HorizontalLayoutWidget((0, 0), children=children, spacing=2)
+        self.mode = mode
+        self.value = None
+        super().__init__(pos, parent.size, children=[parent])
+
+    def draw(self) -> None:
+        mode, raw_value = self.mode, self.value
+        self.bar.value = raw_value
+        if raw_value is not None:
+            h_min, h_max = [(0, 1), (-1, 1), (-1, 0)][mode]
+            value = max(h_min, min(h_max, raw_value))
+            surface, color = self.surface, self.color
+            width, height = self.bar.size
+            x_max, y_max = width - 1, height - 1
+            h_padding = 2
+            rect_x = [0, x_max // 2, x_max][mode] + self.bar.pos[0]
+            rect_y = self.bar.pos[1]
+            rect_w = int((x_max // (h_max - h_min) - 2 * h_padding) * abs(value))
+            rect_h = height
+            if value > 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x + h_padding, rect_y, rect_w + 1, rect_h))
+            elif value < 0:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x - h_padding, rect_y, -rect_w + 1, rect_h))
+            if mode == VerticalBarWidget.MODE_CENTER:
+                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, 1, height))
