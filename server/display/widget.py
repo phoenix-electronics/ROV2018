@@ -99,19 +99,15 @@ class VerticalBarWidget(Widget):
 
     def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, top_text: str = None,
                  bot_text: str = None) -> None:
-        bar_width, bar_height = size
-        top, bot = None, None
+        children = []
         if top_text:
-            top = TextWidget((0, 0), top_text)
-            bar_height -= top.size[1]
+            children.append(TextWidget((0, 0), top_text))
+        self.bar = BarWidget((0, 0), size, (True, False, True, False))
+        children.append(self.bar)
         if bot_text:
-            bot = TextWidget((0, 0), bot_text)
-            bar_height -= bot.size[1]
-        self.bar = BarWidget((0, 0), (bar_width, bar_height), (True, False, True, False))
-        children = list(filter(None, [top, self.bar, bot]))
+            children.append(TextWidget((0, 0), bot_text))
         parent = VerticalLayoutWidget((0, 0), children=children, spacing=0)
-        self.mode = mode
-        self.value = None
+        self.mode, self.value = mode, None
         super().__init__(pos, parent.size, children=[parent])
 
     def draw(self):
@@ -141,19 +137,15 @@ class HorizontalBarWidget(Widget):
 
     def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, left_text: str = None,
                  right_text: str = None) -> None:
-        bar_width, bar_height = size
-        left, right = None, None
+        children = []
         if left_text:
-            left = TextWidget((0, 0), left_text)
-            bar_width -= left.size[0]
+            children.append(TextWidget((0, 0), left_text))
+        self.bar = BarWidget((0, 0), size, (False, True, False, True))
+        children.append(self.bar)
         if right_text:
-            right = TextWidget((0, 0), right_text)
-            bar_width -= right.size[0]
-        self.bar = BarWidget((0, 0), (bar_width, bar_height), (False, True, False, True))
-        children = list(filter(None, [left, self.bar, right]))
+            children.append(TextWidget((0, 0), right_text))
         parent = HorizontalLayoutWidget((0, 0), children=children, spacing=2)
-        self.mode = mode
-        self.value = None
+        self.mode, self.value = mode, None
         super().__init__(pos, parent.size, children=[parent])
 
     def draw(self) -> None:
