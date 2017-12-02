@@ -11,7 +11,7 @@ class Widget:
         self.size = size
         self.color = Widget.DEFAULT_COLOR
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
-        self.children = children or List[Widget]
+        self.children = children if children else []
 
     def blit(self, surface: pygame.Surface) -> None:
         self.surface.fill((0, 0, 0, 0))
