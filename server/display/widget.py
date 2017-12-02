@@ -67,12 +67,14 @@ class BorderLayoutWidget(Widget):
 
 
 class TextWidget(Widget):
-    def __init__(self, pos: Tuple[int, int], text: str, size: Tuple[int, int] = None, font_size: int = 14) -> None:
+    def __init__(self, pos: Tuple[int, int], text: str, font_size: int = 15) -> None:
+        # TODO: Share loaded fonts across instances
         self.font = pygame.font.SysFont('Arial', font_size)
         self.text = text
-        super().__init__(pos, size or self.font.size(text))
+        super().__init__(pos, self.font.size(text))
 
     def draw(self) -> None:
+        # TODO: Only re-render when text has changed
         text_surface = self.font.render(self.text, False, self.color)
         self.surface.blit(text_surface, (0, 0))
 
