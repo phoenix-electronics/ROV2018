@@ -1,15 +1,17 @@
+from typing import Tuple, List
+
 import pygame
 
 
 class Widget:
     DEFAULT_COLOR = (255, 255, 255)
 
-    def __init__(self, pos: (int, int), size: (int, int), children: ['Widget'] = None) -> None:
+    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], children: List['Widget'] = None) -> None:
         self.pos = pos
         self.size = size
         self.color = Widget.DEFAULT_COLOR
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
-        self.children = children or []
+        self.children = children or List[Widget]
 
     def blit(self, surface: pygame.Surface) -> None:
         self.surface.fill((0, 0, 0, 0))
@@ -25,7 +27,8 @@ class Widget:
 class VerticalLayoutWidget(Widget):
     ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT = range(3)
 
-    def __init__(self, pos: (int, int), children: [Widget], alignment: int = ALIGN_CENTER, spacing: int = 0) -> None:
+    def __init__(self, pos: Tuple[int, int], children: [Widget], alignment: int = ALIGN_CENTER,
+                 spacing: int = 0) -> None:
         width, height = 0, 0
         if children:
             widths, heights = zip(*[child.size for child in children])
@@ -41,7 +44,8 @@ class VerticalLayoutWidget(Widget):
 class HorizontalLayoutWidget(Widget):
     ALIGN_TOP, ALIGN_MIDDLE, ALIGN_BOTTOM = range(3)
 
-    def __init__(self, pos: (int, int), children: [Widget], alignment: int = ALIGN_MIDDLE, spacing: int = 0) -> None:
+    def __init__(self, pos: Tuple[int, int], children: [Widget], alignment: int = ALIGN_MIDDLE,
+                 spacing: int = 0) -> None:
         width, height = 0, 0
         if children:
             widths, heights = zip(*[child.size for child in children])
@@ -55,7 +59,7 @@ class HorizontalLayoutWidget(Widget):
 
 
 class BorderLayoutWidget(Widget):
-    def __init__(self, pos: (int, int), top: Widget = None, right: Widget = None, bottom: Widget = None,
+    def __init__(self, pos: Tuple[int, int], top: Widget = None, right: Widget = None, bottom: Widget = None,
                  left: Widget = None, center: Widget = None, spacing: int = 0) -> None:
         h_widget = HorizontalLayoutWidget((0, 0), list(filter(None, (left, center, right))), spacing=spacing)
         v_widget = VerticalLayoutWidget((0, 0), list(filter(None, (top, h_widget, bottom))), spacing=spacing)
@@ -63,7 +67,7 @@ class BorderLayoutWidget(Widget):
 
 
 class TextWidget(Widget):
-    def __init__(self, pos: (int, int), text: str, font_size: int = 14, size: (int, int) = None) -> None:
+    def __init__(self, pos: Tuple[int, int], text: str, size: Tuple[int, int] = None, font_size: int = 14) -> None:
         self.font = pygame.font.SysFont('Arial', font_size)
         self.text = text
         super().__init__(pos, size or self.font.size(text))
@@ -74,7 +78,7 @@ class TextWidget(Widget):
 
 
 class BarWidget(Widget):
-    def __init__(self, pos: (int, int), size: (int, int), border: (bool, bool, bool, bool)) -> None:
+    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], border: Tuple[bool, bool, bool, bool]) -> None:
         self.border = border
         self.value = None
         super().__init__(pos, size)
@@ -97,12 +101,12 @@ class BarWidget(Widget):
 class VerticalBarWidget(Widget):
     MODE_NORMAL, MODE_CENTER, MODE_INVERT = range(3)
 
-    def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, top_text: str = None,
-                 bot_text: str = None) -> None:
+    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], mode: int = MODE_NORMAL, top_text: str = None,
+                 bot_text: str = None, border: Tuple[bool, bool, bool, bool] = None) -> None:
         children = []
         if top_text:
             children.append(TextWidget((0, 0), top_text))
-        self.bar = BarWidget((0, 0), size, (True, False, True, False))
+        self.bar = BarWidget((0, 0), size, border or (True, False, True, False))
         children.append(self.bar)
         if bot_text:
             children.append(TextWidget((0, 0), bot_text))
@@ -135,12 +139,12 @@ class VerticalBarWidget(Widget):
 class HorizontalBarWidget(Widget):
     MODE_NORMAL, MODE_CENTER, MODE_INVERT = range(3)
 
-    def __init__(self, pos: (int, int), size: (int, int), mode: int = MODE_NORMAL, left_text: str = None,
-                 right_text: str = None) -> None:
+    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], mode: int = MODE_NORMAL, left_text: str = None,
+                 right_text: str = None, border: Tuple[bool, bool, bool, bool] = None) -> None:
         children = []
         if left_text:
             children.append(TextWidget((0, 0), left_text))
-        self.bar = BarWidget((0, 0), size, (False, True, False, True))
+        self.bar = BarWidget((0, 0), size, border or (False, True, False, True))
         children.append(self.bar)
         if right_text:
             children.append(TextWidget((0, 0), right_text))
