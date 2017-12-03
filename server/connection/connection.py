@@ -1,23 +1,22 @@
-import pygame
+from server.timer.timer import Timer
 
 
 class Connection:
     DEFAULT_TTL = 100
 
-    def __init__(self) -> None:
-        self.ttl = self.DEFAULT_TTL
-        self.init_time = 0
+    def __init__(self, ttl: int = DEFAULT_TTL) -> None:
+        self.timer = Timer(ttl)
         self._open = False
 
     def open(self) -> None:
         self._open = True
-        self.init_time = pygame.time.get_ticks()
+        self.timer.restart()
 
     def close(self) -> None:
         self._open = False
 
     def is_expired(self) -> bool:
-        return pygame.time.get_ticks() - self.init_time > self.ttl
+        return self.timer.is_expired()
 
     def is_open(self) -> bool:
         if self.is_expired():
