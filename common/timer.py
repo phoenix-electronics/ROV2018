@@ -7,10 +7,13 @@ class Timer:
         self.start_time = perf_counter()
 
     def is_expired(self) -> bool:
-        return self.get_remaining_time() > 0
+        return self.get_remaining_time() == 0
 
-    def get_remaining_time(self) -> int:
-        return max(perf_counter() - self.start_time, 0)
+    def get_elapsed_time(self) -> float:
+        return perf_counter() - self.start_time
+
+    def get_remaining_time(self) -> float:
+        return max(self.length - self.get_elapsed_time(), 0)
 
     def wait(self) -> None:
         sleep(self.get_remaining_time())
