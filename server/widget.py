@@ -174,3 +174,25 @@ class HorizontalBarWidget(Widget):
                 pygame.draw.rect(surface, color, pygame.Rect(rect_x - h_padding, rect_y, -rect_w + 1, rect_h))
             if mode == VerticalBarWidget.MODE_CENTER:
                 pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, 1, height))
+
+
+class LabeledContainerWidget(Widget):
+    DEFAULT_LABEL_COLOR = (0, 0, 0)
+
+    def __init__(self, pos: Tuple[int, int], child: Widget, text: str, padding: int = 4) -> None:
+        self.label = TextWidget((5, 2), text, font_size=11)
+        self.label.color = self.DEFAULT_LABEL_COLOR
+        self.padding = padding
+        label_w, label_h = self.label.size
+        child_w, child_h = child.size
+        child.pos = (padding, label_h + 4 + padding)
+        width = max(label_w + 8, child_w + 2 * padding)
+        height = label_h + 4 + child_h + 2 * padding
+        super().__init__(pos, (width, height), children=[self.label, child])
+
+    def draw(self) -> None:
+        surface, color = self.surface, self.color
+        label_w, label_h = self.label.size
+        width, height = self.size
+        pygame.draw.rect(surface, color, pygame.Rect(0, 0, label_w + 8, label_h + 4))
+        pygame.draw.rect(surface, color, pygame.Rect(0, label_h + 4, width, height - label_h - 4), 1)
