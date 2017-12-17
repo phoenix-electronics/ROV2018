@@ -131,11 +131,11 @@ class VerticalBarWidget(Widget):
             rect_w = width
             rect_h = int((y_max // (v_max - v_min) - 2 * v_padding) * abs(value))
             if value > 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y - v_padding, rect_w, -rect_h + 1))
+                pygame.draw.rect(surface, color, (rect_x, rect_y - v_padding, rect_w, -rect_h + 1))
             elif value < 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y + v_padding, rect_w, rect_h + 1))
+                pygame.draw.rect(surface, color, (rect_x, rect_y + v_padding, rect_w, rect_h + 1))
             if mode == VerticalBarWidget.MODE_CENTER:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, width, 1))
+                pygame.draw.rect(surface, color, (rect_x, rect_y, width, 1))
 
 
 class HorizontalBarWidget(Widget):
@@ -169,11 +169,11 @@ class HorizontalBarWidget(Widget):
             rect_w = int((x_max // (h_max - h_min) - 2 * h_padding) * abs(value))
             rect_h = height
             if value > 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x + h_padding, rect_y, rect_w + 1, rect_h))
+                pygame.draw.rect(surface, color, (rect_x + h_padding, rect_y, rect_w + 1, rect_h))
             elif value < 0:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x - h_padding, rect_y, -rect_w + 1, rect_h))
+                pygame.draw.rect(surface, color, (rect_x - h_padding, rect_y, -rect_w + 1, rect_h))
             if mode == VerticalBarWidget.MODE_CENTER:
-                pygame.draw.rect(surface, color, pygame.Rect(rect_x, rect_y, 1, height))
+                pygame.draw.rect(surface, color, (rect_x, rect_y, 1, height))
 
 
 class LabeledContainerWidget(Widget):
@@ -194,5 +194,5 @@ class LabeledContainerWidget(Widget):
         surface, color = self.surface, self.color
         label_w, label_h = self.label.size
         width, height = self.size
-        pygame.draw.rect(surface, color, pygame.Rect(0, 0, label_w + 8, label_h + 4))
-        pygame.draw.rect(surface, color, pygame.Rect(0, label_h + 4, width, height - label_h - 4), 1)
+        pygame.draw.rect(surface, color, (0, 0, label_w + 8, label_h + 4))
+        pygame.draw.rect(surface, color, (0, label_h + 4, width, height - label_h - 4), 1)
