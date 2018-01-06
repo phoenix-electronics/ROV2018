@@ -10,15 +10,26 @@ class Widget:
         self.pos = pos
         self.size = size
         self.color = Widget.DEFAULT_COLOR
+        self.visible = True
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
         self.children = children if children else []
 
     def blit(self, surface: pygame.Surface) -> None:
-        self.surface.fill((0, 0, 0, 0))
-        self.draw()
-        for child in self.children:
-            child.blit(self.surface)
-        surface.blit(self.surface, self.pos)
+        if self.visible:
+            self.surface.fill((0, 0, 0, 0))
+            self.draw()
+            for child in self.children:
+                child.blit(self.surface)
+            surface.blit(self.surface, self.pos)
+
+    def _scx(self, x: float, margin: int = 0) -> int:
+        return int((self.size[0] - 1 - margin * 2) * x) + margin
+
+    def _scy(self, y: float, margin: int = 0) -> int:
+        return int((self.size[1] - 1 - margin * 2) * y) + margin
+
+    def _sc(self, x: float, y: float, margin: int = 0) -> Tuple[int, int]:
+        return self._scx(x, margin), self._scy(y, margin)
 
     def draw(self) -> None:
         pass
@@ -85,25 +96,40 @@ class TextWidget(Widget):
         self.surface.blit(self.text_surface, (0, 0))
 
 
+class GlyphWidget(Widget):
+    GLYPH_NONE, GLYPH_ERROR, GLYPH_SQUARE = range(3)
+
+    def __init__(self, pos: Tuple[int, int], size: int, glyph: int, margin: int = 0) -> None:
+        self.glyph = glyph
+        self.margin = margin
+        super().__init__(pos, (size, size))
+
+    def draw(self) -> None:
+        glyph, margin, surface, color = self.glyph, self.margin, self.surface, self.color
+        if glyph == GlyphWidget.GLYPH_ERROR:
+            pygame.draw.line(surface, color, self._sc(0, 0, margin), self._sc(1, 1, margin))
+            pygame.draw.line(surface, color, self._sc(0, 1, margin), self._sc(1, 0, margin))
+        elif glyph == GlyphWidget.GLYPH_SQUARE:
+            dist, size = margin, self.size[0] - margin - 1
+            pygame.draw.rect(surface, color, (dist, dist, size, size))
+
+
 class BarWidget(Widget):
     def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], border: Tuple[bool, bool, bool, bool]) -> None:
         self.border = border
         self.value = None
-        super().__init__(pos, size)
+        glyph_size = min(*size)
+        glyph_x, glyph_y = (size[0] - glyph_size) // 2, (size[1] - glyph_size) // 2
+        self.glyph = GlyphWidget((glyph_x, glyph_y), glyph_size, GlyphWidget.GLYPH_ERROR)
+        super().__init__(pos, size, [self.glyph])
 
     def draw(self) -> None:
-        width, height = self.size
-        x_max, y_max = width - 1, height - 1
-        border_points = [(x * x_max, y * y_max) for x, y in [(0, 0), (1, 0), (1, 1), (0, 1)]]
+        border_points = [(0, 0), (1, 0), (1, 1), (0, 1)]
         for side, border in enumerate(self.border):
             if border:
-                point1, point2 = border_points[side], border_points[(side + 1) % 4]
-                pygame.draw.line(self.surface, self.color, point1, point2)
-        if self.value is None:
-            size = min(x_max, y_max)
-            orig_x, orig_y = (x_max - size) // 2, (y_max - size) // 2
-            pygame.draw.line(self.surface, self.color, (orig_x, orig_y), (orig_x + size, orig_y + size))
-            pygame.draw.line(self.surface, self.color, (orig_x, orig_y + size), (orig_x + size, orig_y))
+                line_start, line_end = border_points[side], border_points[(side + 1) % 4]
+                pygame.draw.line(self.surface, self.color, self._sc(*line_start), self._sc(*line_end))
+        self.glyph.visible = self.value is None
 
 
 class VerticalBarWidget(Widget):
