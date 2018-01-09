@@ -110,7 +110,7 @@ class GlyphWidget(Widget):
             pygame.draw.line(surface, color, self._sc(0, 0, margin), self._sc(1, 1, margin))
             pygame.draw.line(surface, color, self._sc(0, 1, margin), self._sc(1, 0, margin))
         elif glyph == GlyphWidget.GLYPH_SQUARE:
-            dist, size = margin, self.size[0] - margin - 1
+            dist, size = margin, self.size[0] - margin * 2
             pygame.draw.rect(surface, color, (dist, dist, size, size))
 
 
