@@ -19,7 +19,7 @@ class CameraStream:
     def restart(self) -> None:
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
-        pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width=640, height=480, framerate=15/1 ! ' + \
+        pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width=640, height=480, framerate=15/1 ! ' \
                         'jpegenc ! rtpjpegpay ! udpsink host="{}" port={}' \
                         .format(self.source, self.host, self.port)
         self.pipeline = Gst.parse_launch(pipeline_args)
