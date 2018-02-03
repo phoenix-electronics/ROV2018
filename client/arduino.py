@@ -5,8 +5,9 @@ from serial.tools import list_ports
 
 
 class Arduino:
-    def __init__(self, baud_rate: int = 57600, use_dtr: bool = False) -> None:
+    def __init__(self, baud_rate: int = 57600, write_timeout: float = 0.05, use_dtr: bool = False) -> None:
         self.baud_rate = baud_rate
+        self.write_timeout = write_timeout
         self.use_dtr = use_dtr
         self.connection = None
 
@@ -19,12 +20,12 @@ class Arduino:
             self.connection = serial.Serial()
             self.connection.port = port
             self.connection.baudrate = self.baud_rate
-            self.connection.writeTimeout = 0
+            self.connection.writeTimeout = self.write_timeout
             self.connection.setDTR(self.use_dtr)
             self.connection.open()
 
-    def send(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
-        data = '!{}:{}:{}:{}:{}:{}\n'.format(*motor_speeds)
+    def write_speeds(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
+        data = '!{}:{}:{}:{}:{}:{};\n'.format(*motor_speeds)
         self.connection.write(data.encode())
 
     def disconnect(self) -> None:
