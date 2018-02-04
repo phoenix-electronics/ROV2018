@@ -19,6 +19,8 @@ void setup() {
 	Serial.begin(SERIAL_RATE);
 	Serial.setTimeout(CMD_TIMEOUT);
 
+	pinMode(LED_BUILTIN, OUTPUT);
+
 	const int motor_pins[6] = {MOTOR_PINS};
 	for (int i = 0; i < 6; i++)
 		motors[i].attach(motor_pins[i], MOTORS_MIN, MOTORS_MAX);
@@ -26,6 +28,8 @@ void setup() {
 
 void loop() {
 	int *motor_speeds = read_speeds();
+
+	digitalWrite(LED_BUILTIN, motor_speeds != NULL);
 
 	for (int i = 0; i < 6; i++) {
 		int speed = motor_speeds != NULL ? motor_speeds[i] : MOTORS_OFF;
