@@ -13,8 +13,9 @@ class CameraStream:
         self.pipeline = None
 
     def set_source(self, source: str) -> None:
-        self.source = source
-        self.restart()
+        if self.source != source:
+            self.source = source
+            self.restart()
 
     def restart(self) -> None:
         if self.pipeline:
