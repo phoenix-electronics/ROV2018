@@ -6,6 +6,8 @@ Gst.init(None)
 
 
 class CameraStream:
+    """Wrapper for a GStreamer V4L2 video stream"""
+
     def __init__(self, host: str = '127.0.0.1', port: int = 5000) -> None:
         self.host = host
         self.port = port
@@ -13,11 +15,13 @@ class CameraStream:
         self.pipeline = None
 
     def set_source(self, source: str) -> None:
+        """Set the source of the video stream, restarting the stream if necessary"""
         if self.source != source:
             self.source = source
             self.restart()
 
     def restart(self) -> None:
+        """Stop and restart the video stream"""
         if self.pipeline:
             self.pipeline.set_state(Gst.State.NULL)
         pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width=640, height=480, framerate=15/1 ! ' \
