@@ -5,10 +5,10 @@ from serial.tools import list_ports
 
 
 class Arduino:
-    def __init__(self, baud_rate: int = 57600, write_timeout: float = 0.05, use_dtr: bool = False) -> None:
+    def __init__(self, baud_rate: int = 57600, write_timeout: float = 0.05, enable_dtr: bool = False) -> None:
         self.baud_rate = baud_rate
         self.write_timeout = write_timeout
-        self.use_dtr = use_dtr
+        self.enable_dtr = enable_dtr
         self.connection = None
 
     def is_connected(self) -> bool:
@@ -21,7 +21,7 @@ class Arduino:
             self.connection.port = port
             self.connection.baudrate = self.baud_rate
             self.connection.writeTimeout = self.write_timeout
-            self.connection.setDTR(self.use_dtr)
+            self.connection.setDTR(self.enable_dtr)
             self.connection.open()
 
     def write_speeds(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
