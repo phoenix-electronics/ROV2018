@@ -8,12 +8,14 @@ from common.timer import Timer
 
 
 def send_obj(sock: socket, obj: object) -> None:
+    """Write a length-delimited serialized object to the socket"""
     data = pickle.dumps(obj)
     sock.sendall(struct.pack('!I', len(data)))
     sock.sendall(data)
 
 
 def recv_obj(sock: socket, timeout: Union[Timer, float]) -> object:
+    """Read a length-delimited serialized object from the socket, or raise socket.error if the timeout is exceeded"""
     timer = timeout if isinstance(timeout, Timer) else Timer(timeout)
     len_data = recv_len(sock, 4, timer)
     length, = struct.unpack('!I', len_data)
@@ -22,6 +24,7 @@ def recv_obj(sock: socket, timeout: Union[Timer, float]) -> object:
 
 
 def recv_len(sock: socket, length: int, timeout: Union[Timer, float]) -> bytes:
+    """Read an exact number of bytes from the socket, or raise socket.error if the timeout is exceeded"""
     timer = timeout if isinstance(timeout, Timer) else Timer(timeout)
     buffer = bytearray()
     while len(buffer) < length and not timer.is_expired():
