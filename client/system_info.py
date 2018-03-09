@@ -1,7 +1,7 @@
 import subprocess
 from typing import Optional
 
-import psutil as psutil
+import psutil
 
 
 def get_cpu_usage() -> float:
