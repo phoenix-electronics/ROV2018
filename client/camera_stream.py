@@ -14,8 +14,9 @@ class CameraStream:
         self.source = None
         self.pipeline = None
 
-    def set_source(self, source: str) -> None:
+    def set_source(self, camera_index: int) -> None:
         """Set the source of the video stream, restarting the stream if necessary"""
+        source = f'/dev/video{camera_index}'
         if self.source != source:
             self.source = source
             self.restart()
@@ -26,6 +27,6 @@ class CameraStream:
             self.pipeline.set_state(Gst.State.NULL)
         pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width=640, height=480, framerate=15/1 ! ' \
                         'jpegenc ! rtpjpegpay ! udpsink host="{}" port={}' \
-                        .format(self.source, self.host, self.port)
+            .format(self.source, self.host, self.port)
         self.pipeline = Gst.parse_launch(pipeline_args)
         self.pipeline.set_state(Gst.State.PLAYING)

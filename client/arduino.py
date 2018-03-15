@@ -17,7 +17,7 @@ class Arduino:
         """Return whether the connection is open"""
         return self.connection is not None and self.connection.is_open
 
-    def connect(self) -> None:
+    def connect(self) -> bool:
         """Attempt to detect the port the Arduino is connected to and open a connection"""
         port = self._detect_port()
         if port is not None:
@@ -26,7 +26,12 @@ class Arduino:
             self.connection.baudrate = self.baud_rate
             self.connection.writeTimeout = self.write_timeout
             self.connection.setDTR(self.enable_dtr)
-            self.connection.open()
+            try:
+                self.connection.open()
+                return True
+            except serial.SerialException:
+                pass
+        return False
 
     def write_speeds(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
         """Write target motor speeds to the Arduino, raising serial.SerialException if the write fails"""
