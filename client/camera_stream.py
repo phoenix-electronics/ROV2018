@@ -8,7 +8,7 @@ Gst.init(None)
 class CameraStream:
     """Wrapper for a GStreamer V4L2 video stream"""
 
-    def __init__(self, host: str = '127.0.0.1', port: int = 5000) -> None:
+    def __init__(self, host: str, port: int) -> None:
         self.host = host
         self.port = port
         self.source = None

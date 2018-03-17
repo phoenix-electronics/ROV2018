@@ -6,13 +6,14 @@ from client.camera_stream import CameraStream
 from client.client import Client
 
 if __name__ == '__main__':
-    # Read server address and port from environment
-    host = os.getenv('HOST', 'localhost')
-    port = int(os.getenv('PORT', '1234'))
+    # Read configuration details from environment
+    host = os.getenv('HOST', 'localhost')  # Server address
+    port = int(os.getenv('PORT', '1234'))  # Server port
+    gst_port = int(os.getenv('GST_PORT', '5000'))  # GStreamer port
 
     # Initialize Arduino connection and video stream
     arduino = Arduino()
-    camera_stream = CameraStream()
+    camera_stream = CameraStream(host, gst_port)
     arduino.connect()
     camera_stream.set_source(0)
 
