@@ -3,6 +3,8 @@ from typing import Optional
 
 import psutil
 
+from common.message import SystemInfoMessage
+
 
 def get_cpu_usage() -> float:
     """Return the current system-wide CPU usage percentage"""
@@ -23,10 +25,6 @@ def get_mem_usage() -> float:
     return psutil.virtual_memory().percent
 
 
-class SystemInfo:
-    """Container for information about the current state of the system"""
-
-    def __init__(self) -> None:
-        self.cpu_usage = get_cpu_usage()
-        self.cpu_temp = get_cpu_temp()
-        self.mem_usage = get_mem_usage()
+def get_system_info_message() -> SystemInfoMessage:
+    """Return a SystemInfoMessage containing information about the current state of the system"""
+    return SystemInfoMessage(get_cpu_usage(), get_cpu_temp(), get_mem_usage())

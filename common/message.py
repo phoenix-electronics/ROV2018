@@ -1,4 +1,4 @@
-from client.system_info import SystemInfo
+from typing import Optional
 
 """Messages contain information sent from the client to the server"""
 
@@ -6,8 +6,10 @@ from client.system_info import SystemInfo
 class SystemInfoMessage:
     """Information about the state of the system"""
 
-    def __init__(self, system_info: SystemInfo) -> None:
-        self.system_info = system_info
+    def __init__(self, cpu_usage: float, cpu_temp: Optional[float], mem_usage: float) -> None:
+        self.cpu_usage = cpu_usage
+        self.cpu_temp = cpu_temp
+        self.mem_usage = mem_usage
 
 
 class ArduinoConnectionMessage:

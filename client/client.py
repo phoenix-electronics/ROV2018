@@ -5,9 +5,9 @@ import serial
 import common.logging as logger
 from client.arduino import Arduino
 from client.camera_stream import CameraStream
-from client.system_info import SystemInfo
+from client.system_info import get_system_info_message
 from common.command import SetMotorSpeedsCommand, SetCameraCommand
-from common.message import ArduinoConnectionMessage, SystemInfoMessage
+from common.message import ArduinoConnectionMessage
 from common.protocol import send_obj, recv_obj
 from common.timer import Timer
 
@@ -44,7 +44,7 @@ class Client:
             while True:
                 # Send a SystemInfoMessage if send_stats_interval has elapsed
                 if send_system_info_timer.is_expired():
-                    send_obj(self.sock, SystemInfoMessage(SystemInfo()))
+                    send_obj(self.sock, get_system_info_message())
                     send_system_info_timer.restart()
                 # Receive and handle command
                 command = recv_obj(self.sock, self.sock_timeout)
