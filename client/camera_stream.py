@@ -16,7 +16,7 @@ class CameraStream:
 
     def set_source(self, camera_index: int) -> None:
         """Set the source of the video stream, restarting the stream if necessary"""
-        source = f'/dev/video{camera_index}'
+        source = '/dev/video{}'.format(camera_index)
         if self.source != source:
             self.source = source
             self.restart()
