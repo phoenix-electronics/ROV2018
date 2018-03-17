@@ -4,7 +4,7 @@ from datetime import datetime
 
 LVL_DEBUG, LVL_INFO, LVL_WARN, LVL_ERROR, LVL_FATAL = range(5)
 
-CFG_MIN_LEVEL = LVL_DEBUG if os.getenv('DEBUG') is not None else LVL_INFO
+MIN_LEVEL = LVL_DEBUG if os.getenv('DEBUG') is not None else LVL_INFO
 
 
 def _fmt_log_msg(lvl: str, fmt: str, *fmt_args) -> str:
@@ -13,25 +13,30 @@ def _fmt_log_msg(lvl: str, fmt: str, *fmt_args) -> str:
 
 
 def debug(fmt, *fmt_args) -> None:
-    if CFG_MIN_LEVEL <= LVL_DEBUG:
+    """Format and log a message with severity DEBUG"""
+    if MIN_LEVEL <= LVL_DEBUG:
         print(_fmt_log_msg('DEBUG', fmt, *fmt_args))
 
 
 def info(fmt, *fmt_args) -> None:
-    if CFG_MIN_LEVEL <= LVL_INFO:
+    """Format and log a message with severity INFO"""
+    if MIN_LEVEL <= LVL_INFO:
         print(_fmt_log_msg('INFO', fmt, *fmt_args))
 
 
 def warn(fmt, *fmt_args) -> None:
-    if CFG_MIN_LEVEL <= LVL_WARN:
+    """Format and log a message with severity WARN"""
+    if MIN_LEVEL <= LVL_WARN:
         print(_fmt_log_msg('WARN', fmt, *fmt_args), file=sys.stderr)
 
 
 def error(fmt, *fmt_args) -> None:
-    if CFG_MIN_LEVEL <= LVL_ERROR:
+    """Format and log a message with severity ERROR"""
+    if MIN_LEVEL <= LVL_ERROR:
         print(_fmt_log_msg('ERROR', fmt, *fmt_args), file=sys.stderr)
 
 
 def fatal(fmt, *fmt_args) -> None:
-    if CFG_MIN_LEVEL <= LVL_FATAL:
+    """Format and log a message with severity FATAL"""
+    if MIN_LEVEL <= LVL_FATAL:
         print(_fmt_log_msg('FATAL', fmt, *fmt_args), file=sys.stderr)
