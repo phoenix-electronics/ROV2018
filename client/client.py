@@ -24,12 +24,13 @@ class Client:
         self.reconnect_delay = reconnect_delay
         self.send_system_info_interval = send_system_info_interval
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(self.sock_timeout)
+        self.sock = None
 
     def connect_and_run(self) -> None:
         """Connect to the server and run the client"""
         logger.info('Connecting to server: {}:{}', self.host, self.port)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(self.sock_timeout)
         try:
             self.sock.connect((self.host, self.port))
         except socket.error as err:
