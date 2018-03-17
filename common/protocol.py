@@ -23,13 +23,18 @@ def recv_obj(sock: socket, timeout: Union[Timer, float]) -> object:
     return pickle.loads(obj_data)
 
 
+def recv_avail(sock: socket, timeout: float = 0) -> bool:
+    """Return whether the socket has data available for reading, either immediately or before a timeout"""
+    return len(select([sock], [], [], timeout)[0]) != 0
+
+
 def recv_len(sock: socket, length: int, timeout: Union[Timer, float]) -> bytes:
     """Read an exact number of bytes from the socket, or raise socket.error if the timeout is exceeded"""
     timer = timeout if isinstance(timeout, Timer) else Timer(timeout)
     buffer = bytearray()
     while len(buffer) < length and not timer.is_expired():
-        select([sock], [], [], timer.get_remaining_time())
-        buffer += sock.recv(length - len(buffer))
+        if recv_avail(sock, timer.get_remaining_time()):
+            buffer += sock.recv(length - len(buffer))
     if len(buffer) != length:
         raise socket.error('timed out')
     return buffer
