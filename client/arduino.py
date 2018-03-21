@@ -7,30 +7,30 @@ from serial.tools import list_ports
 class Arduino:
     """Wrapper for a serial connection to an Arduino"""
 
-    def __init__(self, baud_rate: int = 57600, write_timeout: float = 0.05, enable_dtr: bool = False) -> None:
+    def __init__(self, port: str = None, baud_rate: int = 57600, write_timeout: float = 0.05) -> None:
+        self.port = port
         self.baud_rate = baud_rate
         self.write_timeout = write_timeout
-        self.enable_dtr = enable_dtr
         self.connection = None
 
     def is_connected(self) -> bool:
-        """Return whether the connection is open"""
+        """Return whether the Arduino is connected"""
         return self.connection is not None and self.connection.is_open
 
     def connect(self) -> bool:
-        """Attempt to detect the port the Arduino is connected to and open a connection"""
-        port = self._detect_port()
+        """Attempt to connect to the Arduino, searching for a port if one is not specified"""
+        port = self.port or self._detect_port()
         if port is not None:
             self.connection = serial.Serial()
             self.connection.port = port
             self.connection.baudrate = self.baud_rate
             self.connection.writeTimeout = self.write_timeout
-            self.connection.setDTR(self.enable_dtr)
+            self.connection.dtr = False
             try:
                 self.connection.open()
                 return True
             except serial.SerialException:
-                pass
+                self.connection = None
         return False
 
     def write_speeds(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
@@ -46,6 +46,5 @@ class Arduino:
 
     @staticmethod
     def _detect_port() -> Optional[str]:
-        port = next(list_ports.grep('Arduino'), None)
-        if port is not None:
+        for port in list_ports.grep('Arduino'):
             return port.device
