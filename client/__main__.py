@@ -7,12 +7,14 @@ from client.client import Client
 
 if __name__ == '__main__':
     # Read configuration details from environment
-    host = os.getenv('HOST', 'localhost')  # Server address
-    port = int(os.getenv('PORT', '1234'))  # Server port
-    gst_port = int(os.getenv('GST_PORT', '5000'))  # GStreamer port
+    host = os.getenv('HOST', 'localhost')
+    port = int(os.getenv('PORT', '1234'))
+
+    gst_port = int(os.getenv('GST_PORT', '5000'))
+    arduino_port = os.getenv('ARDUINO_PORT')
 
     # Initialize Arduino connection and video stream
-    arduino = Arduino()
+    arduino = Arduino(arduino_port)
     camera_stream = CameraStream(host, gst_port)
     arduino.connect()
     camera_stream.set_source(0)
