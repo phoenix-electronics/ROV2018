@@ -1,4 +1,4 @@
-import subprocess
+from subprocess import check_output, CalledProcessError
 from typing import Optional
 
 import psutil
@@ -14,9 +14,9 @@ def get_cpu_usage() -> float:
 def get_cpu_temp() -> Optional[float]:
     """Return the current CPU temperature (if available) in degrees celsius"""
     try:
-        temp_str = subprocess.check_output(['sudo', '-n', '/opt/vc/bin/vcgencmd', 'measure_temp'])
+        temp_str = check_output(['sudo', '-n', '/opt/vc/bin/vcgencmd', 'measure_temp'])
         return float(temp_str.replace(b'temp=', b'').replace(b'\'C', b''))
-    except (subprocess.CalledProcessError, ValueError):
+    except (IOError, CalledProcessError, ValueError):
         pass
 
 
