@@ -2,7 +2,7 @@ import socket
 
 import serial
 
-import common.logging as logger
+import common.logging as logging
 from client.arduino import Arduino
 from client.camera_stream import CameraStream
 from client.system_info import get_system_info_message
@@ -28,15 +28,15 @@ class Client:
 
     def connect_and_run(self) -> None:
         """Connect to the server and run the client"""
-        logger.info('Connecting to server: {}:{}', self.host, self.port)
+        logging.info('Connecting to server: {}:{}', self.host, self.port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(self.sock_timeout)
         try:
             self.sock.connect((self.host, self.port))
         except socket.error as err:
-            logger.error('Unable to connect: {} (retrying in {}s)', err, self.reconnect_delay)
+            logging.error('Unable to connect: {} (retrying in {}s)', err, self.reconnect_delay)
             return
-        logger.info("Connected to server")
+        logging.info("Connected to server")
         # Initialize timer to periodically send a SystemInfoMessage
         send_system_info_timer = Timer(self.send_system_info_interval, start_expired=True)
         try:
@@ -51,7 +51,7 @@ class Client:
                 command = recv_obj(self.sock, self.sock_timeout)
                 self.handle_command(command)
         except socket.error as err:
-            logger.error('Connection closed: {} (reconnecting in {}s)', err, self.reconnect_delay)
+            logging.error('Connection closed: {} (reconnecting in {}s)', err, self.reconnect_delay)
         finally:
             self.sock.close()
             # If the Arduino is connected, try and stop the motors
