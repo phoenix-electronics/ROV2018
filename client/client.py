@@ -57,7 +57,7 @@ class Client:
             # If the Arduino is connected, try and stop the motors
             if self.arduino.is_connected():
                 try:
-                    self.arduino.write_speeds((1500, 1500, 1500, 1500, 1500, 1500))
+                    self.arduino.write_speeds(None)
                 except serial.SerialException:
                     pass
 

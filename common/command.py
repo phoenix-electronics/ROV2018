@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 """Commands contain information sent from the server to the client"""
 
@@ -6,7 +6,7 @@ from typing import Tuple
 class SetMotorSpeedsCommand:
     """Set the speeds of the motors"""
 
-    def __init__(self, motor_speeds: Tuple[int, int, int, int, int, int]) -> None:
+    def __init__(self, motor_speeds: Optional[Tuple[int, int, int, int, int, int]]) -> None:
         self.motor_speeds = motor_speeds
 
     def __repr__(self) -> str:
