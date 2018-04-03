@@ -1,37 +1,92 @@
 import socket
-import sys
 
-from common.protocol import recv_obj, send_obj
+import pygame
+
+from common import logging
+from common.command import SetMotorSpeedsCommand
+from common.message import ArduinoConnectionMessage, SystemInfoMessage
+from common.protocol import recv_avail, recv_obj, send_obj
+from server import events
+from server.joystick import Joystick
+from server.motor_vectoring import calculate_motor_speeds
+from server.window import Window
 
 
 class Server:
-    ACK_TIMEOUT = 0.2
-    CLOSE_DELAY = 0.1
-
-    def __init__(self, host: str, port: int) -> None:
+    def __init__(self, host: str, port: int, joystick: Joystick, window: Window, sock_timeout: float = 0.5) -> None:
         self.host = host
         self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock_timeout = sock_timeout
 
-    def run_server(self) -> None:
-        host = self.host
-        port = self.port
-        sock = self.sock
-        sock.bind((host, port))
-        sock.listen(1)
-        print('Server started: {}:{}'.format(host, port))
-        while True:
-            self.handle_connection()
+        self.joystick = joystick
+        self.window = window
+
+        self.server_sock = None
+        self.client_sock = None
+        self.client_addr = None
+
+    def run(self) -> None:
+        """Run the server"""
+        try:
+            # Create and bind the server socket
+            self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_sock.settimeout(self.sock_timeout)
+            self.server_sock.bind((self.host, self.port))
+            self.server_sock.listen(1)
+            logging.info('Server started on {}:{}', self.host, self.port)
+            while True:
+                # Handle Pygame events and update the window while waiting for an incoming connection
+                while not recv_avail(self.server_sock):
+                    self.handle_event(pygame.event.wait())
+                    self.window.update()
+                # Once an incoming connection is being made, handle it
+                self.handle_connection()
+        finally:
+            self.server_sock.close()
 
     def handle_connection(self) -> None:
-        sock = self.sock
+        """Accept and handle a client connection"""
         try:
-            conn, addr = sock.accept()
-            print('     Connected: {}'.format(addr[0]))
-            msg = "Test message"
-            send_obj(conn, msg)
-            resp = recv_obj(conn, Server.ACK_TIMEOUT)
-            print(resp)
-            print('  Disconnected.')
+            # Accept the incoming connection
+            self.client_sock, self.client_addr = self.server_sock.accept()
+            logging.info('Client connected: {}', self.client_addr[0])
+            while True:
+                # Handle Pygame events and update the window
+                self.handle_event(pygame.event.wait())
+                self.window.update()
+                # Receive and handle a message from the client, if one is available
+                if recv_avail(self.client_sock):
+                    message = recv_obj(self.client_sock, self.sock_timeout)
+                    self.handle_message(message)
         except socket.error as err:
-            print('  Disconnected: {}'.format(err), file=sys.stderr)
+            logging.error('Client disconnected: {}', err)
+        finally:
+            self.client_sock.close()
+            self.client_sock = None
+            self.client_addr = None
+
+    def handle_message(self, message: object) -> None:
+        """Handle a message from the client"""
+        if isinstance(message, ArduinoConnectionMessage):
+            pass  # TODO: Update self.window
+        elif isinstance(message, SystemInfoMessage):
+            pass  # TODO: Update self.window
+
+    def handle_event(self, event: pygame.event.EventType) -> None:
+        """Handle a Pygame event"""
+        if event.type == events.READ_JOYSTICK:
+            # Read the joystick's axes, if it is connected
+            joystick_data = self.joystick.read_values() if self.joystick.is_connected() else None
+            # TODO: Update self.window
+            # Calculate and send new motor speeds to the client, if it is connected
+            if self.client_sock is not None:
+                motor_speeds = calculate_motor_speeds(joystick_data) if joystick_data is not None else None
+                send_obj(self.client_sock, SetMotorSpeedsCommand(motor_speeds))
+        elif event.type == events.CHECK_JOYSTICK:
+            # Reinitialize the joystick module to check for changes
+            pygame.joystick.quit()
+            pygame.joystick.init()
+            self.joystick.connect()
+        elif event.type == pygame.QUIT:
+            # Window close requested, exit
+            raise SystemExit
