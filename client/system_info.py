@@ -16,7 +16,7 @@ def get_cpu_temp() -> Optional[float]:
     try:
         temp_str = check_output(['sudo', '-n', '/opt/vc/bin/vcgencmd', 'measure_temp'])
         return float(temp_str.replace(b'temp=', b'').replace(b'\'C', b''))
-    except (IOError, CalledProcessError, ValueError):
+    except (OSError, CalledProcessError, ValueError):
         pass
 
 
