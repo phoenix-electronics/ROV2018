@@ -38,7 +38,7 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
     ]
 
     # Scale the speeds of the horizontal motors down if necessary
-    h_motor_speeds_max = max(max(h_motor_speeds), 1)
+    h_motor_speeds_max = max(max([abs(speed) for speed in h_motor_speeds]), 1)
     h_motor_speeds = [speed / h_motor_speeds_max for speed in h_motor_speeds]
 
     # Calculate and return the final motor speeds
