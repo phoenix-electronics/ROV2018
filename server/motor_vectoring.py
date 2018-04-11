@@ -48,4 +48,4 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
         -h_motor_speeds[1]
     ]
     # Scale and return the final motor speeds
-    return tuple([int(1500 + speed * 500) for speed in motor_speeds])[:]
+    return tuple([int(1500 + speed * 400) for speed in motor_speeds])[:]

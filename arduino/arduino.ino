@@ -6,8 +6,8 @@
 #define CMD_MAX_LEN 128
 
 #define MOTORS_OFF 1500
-#define MOTORS_MIN 1000
-#define MOTORS_MAX 2000
+#define MOTORS_MIN 1100
+#define MOTORS_MAX 1900
 
 #include <Servo.h>
 
@@ -22,8 +22,10 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 
 	const int motor_pins[6] = {MOTOR_PINS};
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++) {
 		motors[i].attach(motor_pins[i], MOTORS_MIN, MOTORS_MAX);
+		motors[i].writeMicroseconds(MOTORS_OFF);
+	}
 }
 
 void loop() {
