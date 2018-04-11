@@ -6,7 +6,7 @@ from server.joystick import JoystickData
 
 def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, int, int, int]:
     # Filter out joystick axis values close to zero (deadband)
-    axes = [axis if abs(axis) >= 0.05 else 0 for axis in joystick_data.axes]
+    axes = [axis if abs(axis) >= 0.08 else 0 for axis in joystick_data.axes]
 
     # Find the requested forward, strafe, yaw, and vertical motion
     forward_cmd = -axes[1]
@@ -25,22 +25,27 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
     # Calculate the effect of yaw on output
     yaw_effect = math.sqrt(3) / 2 * yaw_cmd
 
-    # Calculate the horizontal and vertical motor speeds
+    # Calculate the horizontal motor speeds
     h_motor_speeds = [
-        rfm_projection - yaw_effect,
+        rfm_projection + yaw_effect,
         lfm_projection - yaw_effect,
         lfm_projection + yaw_effect,
-        rfm_projection + yaw_effect
-    ]
-    v_motor_speeds = [
-        vertical_cmd,
-        vertical_cmd
+        rfm_projection - yaw_effect
     ]
 
     # Scale the speeds of the horizontal motors down if necessary
     h_motor_speeds_max = max(max([abs(speed) for speed in h_motor_speeds]), 1)
     h_motor_speeds = [speed / h_motor_speeds_max for speed in h_motor_speeds]
 
-    # Calculate and return the final motor speeds
-    motor_speeds = [int(1500 + speed * 500) for speed in h_motor_speeds + v_motor_speeds]
-    return tuple(motor_speeds)[:]
+    # Combine the horizontal and vertical motor speeds
+    # The ordering and sign of some of the values are changed to match the physical configuration of the motors
+    motor_speeds = [
+        -h_motor_speeds[3],
+        h_motor_speeds[2],
+        vertical_cmd,
+        -vertical_cmd,
+        -h_motor_speeds[0],
+        -h_motor_speeds[1]
+    ]
+    # Scale and return the final motor speeds
+    return tuple([int(1500 + speed * 500) for speed in motor_speeds])[:]
