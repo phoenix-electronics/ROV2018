@@ -31,6 +31,7 @@ class Server:
             # Create and bind the server socket
             self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.server_sock.settimeout(self.sock_timeout)
+            self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server_sock.bind((self.host, self.port))
             self.server_sock.listen(1)
             logging.info('Server started on {}:{}', self.host, self.port)
