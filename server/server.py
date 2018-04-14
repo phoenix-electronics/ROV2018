@@ -34,7 +34,7 @@ class Server:
             self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server_sock.bind((self.host, self.port))
             self.server_sock.listen(1)
-            logging.info('Server started on {}:{}', self.host, self.port)
+            logging.info('Server started on {}:{}', self.host or 'INADDR_ANY', self.port)
             while True:
                 # Handle Pygame events and update the window while waiting for an incoming connection
                 while not recv_avail(self.server_sock):
