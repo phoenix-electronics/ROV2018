@@ -1,6 +1,7 @@
 #define SERIAL_RATE 57600
 
-#define MOTOR_PINS 2, 3, 4, 5, 6, 7
+#define MOTOR_PINS 6, 7, 3, 2, 4, 5
+#define MOTOR_FLIP 1, 1, 0, 1, 0, 1
 
 #define CMD_TIMEOUT 250
 #define CMD_MAX_LEN 128
@@ -15,13 +16,15 @@ Servo motors[6];
 
 int *read_speeds(void);
 
+const int motor_pins[6] = {MOTOR_PINS};
+const int motor_flip[6] = {MOTOR_FLIP};
+
 void setup() {
 	Serial.begin(SERIAL_RATE);
 	Serial.setTimeout(CMD_TIMEOUT);
 
 	pinMode(LED_BUILTIN, OUTPUT);
 
-	const int motor_pins[6] = {MOTOR_PINS};
 	for (int i = 0; i < 6; i++) {
 		motors[i].attach(motor_pins[i], MOTORS_MIN, MOTORS_MAX);
 		motors[i].writeMicroseconds(MOTORS_OFF);
@@ -34,7 +37,12 @@ void loop() {
 	digitalWrite(LED_BUILTIN, motor_speeds != NULL);
 
 	for (int i = 0; i < 6; i++) {
-		int speed = motor_speeds != NULL ? motor_speeds[i] : MOTORS_OFF;
+		int speed = MOTORS_OFF;
+		if (motor_speeds != NULL) {
+		    speed = motor_speeds[i];
+            if (motor_flip[i])
+                speed = 2 * MOTORS_OFF - speed;
+        }
 		motors[i].writeMicroseconds(speed);
 	}
 }
