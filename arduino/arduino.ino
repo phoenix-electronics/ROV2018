@@ -1,7 +1,7 @@
 #define SERIAL_RATE 57600
 
-#define MOTOR_PINS 6, 7, 3, 2, 4, 5
-#define MOTOR_FLIP 1, 1, 0, 1, 0, 1
+#define MOTOR_PINS 6, 7, 2, 3, 4, 5
+#define MOTOR_FLIP 1, 1, 1, 1, 0, 1
 
 #define CMD_TIMEOUT 250
 #define CMD_MAX_LEN 128
