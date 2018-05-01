@@ -4,7 +4,7 @@ from typing import Tuple
 from server.joystick import JoystickData
 
 
-def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, int, int, int]:
+def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, int, int, int, int]:
     # Filter out joystick axis values close to zero (deadband)
     axes = [axis if abs(axis) >= 0.08 else 0 for axis in joystick_data.axes]
 
@@ -13,6 +13,7 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
     strafe_cmd = axes[0]
     yaw_cmd = axes[2]
     vertical_cmd = (1 - axes[3]) * joystick_data.hat[1] / 2
+    camera_rot_cmd = joystick_data.hat[0]
 
     # Convert the square joystick input area into a circle
     forward_cmd_circle = forward_cmd * math.sqrt(1 - strafe_cmd ** 2 / 2)
@@ -41,6 +42,11 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
     h_motor_speeds_max = max(max([abs(speed) for speed in h_motor_speeds]), 1)
     h_motor_speeds = [speed / h_motor_speeds_max for speed in h_motor_speeds]
 
-    # Combine, scale, and return the final motor speeds
+    # Combine and scale the motor speeds
     motor_speeds = [int(1500 + speed * 400) for speed in h_motor_speeds + v_motor_speeds]
+
+    # Append the camera rotation speed
+    motor_speeds.append(camera_rot_cmd)
+
+    # Return the speeds
     return tuple(motor_speeds)[:]

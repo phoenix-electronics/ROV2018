@@ -6,7 +6,7 @@ from typing import Tuple, Optional
 class SetMotorSpeedsCommand:
     """Set the speeds of the motors"""
 
-    def __init__(self, motor_speeds: Optional[Tuple[int, int, int, int, int, int]]) -> None:
+    def __init__(self, motor_speeds: Optional[Tuple[int, int, int, int, int, int, int]]) -> None:
         self.motor_speeds = motor_speeds
 
     def __repr__(self) -> str:

@@ -33,11 +33,11 @@ class Arduino:
                 self.connection = None
         return False
 
-    def write_speeds(self, motor_speeds: Optional[Tuple[int, int, int, int, int, int]]) -> None:
+    def write_speeds(self, motor_speeds: Optional[Tuple[int, int, int, int, int, int, int]]) -> None:
         """Write target motor speeds to the Arduino, raising serial.SerialException if the write fails"""
         if motor_speeds is None:
-            motor_speeds = (1500, 1500, 1500, 1500, 1500, 1500)
-        data = '!{}:{}:{}:{}:{}:{};\n'.format(*motor_speeds)
+            motor_speeds = (1500, 1500, 1500, 1500, 1500, 1500, 0)
+        data = '!{},{},{},{},{},{},{};\n'.format(*motor_speeds)
         self.connection.write(data.encode())
 
     def disconnect(self) -> None:
