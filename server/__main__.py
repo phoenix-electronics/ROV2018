@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+from common import logging
 from server import events
 from server.joystick import Joystick
 from server.server import Server
@@ -29,6 +30,11 @@ if __name__ == '__main__':
     window = Window()
     joystick.connect()
     window.show()
+
+    # Warn if joystick hotplugging is disabled and a joystick is not detected
+    if not enable_joystick_hotplug and not joystick.is_connected():
+        logging.warn('Joystick not detected and ENABLE_JOYSTICK_HOTPLUG is not set!')
+        logging.warn('Connect a joystick and restart the program to fix this.')
 
     # Create and run server
     server = Server(host, port, joystick, window)
