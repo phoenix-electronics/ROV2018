@@ -63,6 +63,8 @@ class Client:
                     self.arduino.write_speeds(None)
                 except serial.SerialException:
                     pass
+            # Stop the currently playing sound, if any
+            self.sound_player.stop()
 
     def handle_command(self, command: object) -> None:
         """Handle command from the server"""
