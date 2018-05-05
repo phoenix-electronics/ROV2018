@@ -5,8 +5,9 @@ import serial
 import common.logging as logging
 from client.arduino import Arduino
 from client.camera_stream import CameraStream
+from client.sound_player import SoundPlayer
 from client.system_info import get_system_info_message
-from common.command import SetMotorSpeedsCommand, SetCameraCommand
+from common.command import SetMotorSpeedsCommand, SetCameraCommand, PlaySoundCommand
 from common.message import ArduinoConnectionMessage
 from common.protocol import send_obj, recv_obj
 from common.timer import Timer
@@ -19,6 +20,8 @@ class Client:
         self.port = port
         self.arduino = arduino
         self.camera_stream = camera_stream
+
+        self.sound_player = SoundPlayer()
 
         self.sock_timeout = sock_timeout
         self.reconnect_delay = reconnect_delay
@@ -78,3 +81,9 @@ class Client:
                     send_obj(self.sock, ArduinoConnectionMessage(False))
         elif isinstance(command, SetCameraCommand):  # Server requested new camera index
             self.camera_stream.set_source(command.camera_index)
+        elif isinstance(command, PlaySoundCommand):  # Server requested that a sound be played
+            # Stop the currently playing sound, if any
+            self.sound_player.stop()
+            # If a sound filename was provided, play the sound
+            if command.filename is not None:
+                self.sound_player.play(command.filename, command.volume)
