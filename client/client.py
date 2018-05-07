@@ -88,4 +88,4 @@ class Client:
             self.sound_player.stop()
             # If a sound filename was provided, play the sound
             if command.filename is not None:
-                self.sound_player.play(command.filename, command.volume)
+                self.sound_player.play(command.filename, command.vol_mb, command.amp_mb)

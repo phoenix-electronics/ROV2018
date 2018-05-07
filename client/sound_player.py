@@ -2,13 +2,14 @@ from subprocess import Popen, DEVNULL
 
 
 class SoundPlayer:
+    """Wrapper for an OMXPlayer instance"""
+
     def __init__(self) -> None:
         self._player_process = None
 
-    def play(self, filename: str, volume: float = 1.0) -> None:
+    def play(self, filename: str, vol_mb: int = 0, amp_mb: int = 0) -> None:
         """Stop the currently playing sound (if any), and play a new sound"""
-        volume_millibels = int((volume - 1) * 6000)
-        process_args = ['omxplayer.bin', '--no-keys', '--vol', str(volume_millibels), filename]
+        process_args = ['omxplayer.bin', '--no-keys', '--vol', str(vol_mb), '--amp', str(amp_mb), filename]
         self._player_process = Popen(process_args, stdout=DEVNULL, stderr=DEVNULL)
 
     def is_playing(self) -> bool:

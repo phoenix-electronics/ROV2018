@@ -10,7 +10,7 @@ class SetMotorSpeedsCommand:
         self.motor_speeds = motor_speeds
 
     def __repr__(self) -> str:
-        return 'SetMotorSpeedsCommand(motor_speeds={!r})'.format(self.motor_speeds)
+        return 'SetMotorSpeedsCommand(motor_speeds={})'.format(self.motor_speeds)
 
 
 class SetCameraCommand:
@@ -20,15 +20,16 @@ class SetCameraCommand:
         self.camera_index = camera_index
 
     def __repr__(self) -> str:
-        return 'SetCameraCommand(camera_index={!r})'.format(self.camera_index)
+        return 'SetCameraCommand(camera_index={})'.format(self.camera_index)
 
 
 class PlaySoundCommand:
-    """Play a sound file, or stop the currently playing sound if no filename is provided"""
+    """Stop the currently playing sound (if any), and play a new sound"""
 
-    def __init__(self, filename: Optional[str], volume: float = 1.0) -> None:
+    def __init__(self, filename: Optional[str], vol_mb: int = 0, amp_mb: int = 0) -> None:
         self.filename = filename
-        self.volume = volume
+        self.vol_mb = vol_mb
+        self.amp_mb = amp_mb
 
     def __repr__(self) -> str:
-        return 'PlaySoundCommand(filename={!r}, volume={!r})'.format(self.filename, self.volume)
+        return 'PlaySoundCommand(filename={!r}, vol_mb={}, amp_mb={})'.format(self.filename, self.vol_mb, self.amp_mb)
