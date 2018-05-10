@@ -4,11 +4,10 @@
 #define MOTOR_FLIP 1, 1, 1, 1, 0, 1
 
 #define STEPPER_PINS 8, 9, 10, 11
+#define STEPPER_RPM 22
 
 #define COMMAND_TIMEOUT 250
 #define COMMAND_BUFSIZE 128
-
-#define STEPPER_RPM 22
 
 #define MOTORS_OFF 1500
 #define MOTORS_MIN 1100
@@ -18,7 +17,7 @@
 #include <CheapStepper.h>
 
 Servo motors[6];
-CheapStepper stepper;
+CheapStepper stepper = CheapStepper(STEPPER_PINS);
 
 const int motor_pins[6] = {MOTOR_PINS};
 const int motor_flip[6] = {MOTOR_FLIP};
@@ -35,13 +34,12 @@ void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
     // Initialize each of the motor ESCs
-    for (int i = 0; i < 6; i++) {
+    for (auto i = 0; i < 6; i++) {
         motors[i].attach(motor_pins[i], MOTORS_MIN, MOTORS_MAX);
         motors[i].writeMicroseconds(MOTORS_OFF);
     }
 
-    // Initialize the stepper motor
-    stepper = CheapStepper(STEPPER_PINS);
+    // Configure the stepper motor
     stepper.setRpm(STEPPER_RPM);
 }
 
@@ -70,10 +68,9 @@ void loop() {
     digitalWrite(LED_BUILTIN, valid_command_received);
 
     // Update stepper_direction, scaling the speed down to at most 1 step
-    if (valid_command_received)
-        stepper_direction = (stepper_speed > 0) - (stepper_speed < 0);
-    else
-        stepper_direction = 0;
+    stepper_direction = valid_command_received
+        ? (stepper_speed > 0) - (stepper_speed < 0)
+        : 0;
 
     // Write the motor speeds to the ESCs
     for (auto i = 0; i < 6; i++) {
