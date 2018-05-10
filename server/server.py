@@ -3,7 +3,7 @@ import socket
 import pygame
 
 from common import logging
-from common.command import SetMotorSpeedsCommand
+from common.command import SetMotorSpeedsCommand, SetCameraCommand, PlaySoundCommand
 from common.message import ArduinoConnectionMessage, SystemInfoMessage
 from common.protocol import recv_avail, recv_obj, send_obj
 from server import events
@@ -88,6 +88,15 @@ class Server:
             pygame.joystick.quit()
             pygame.joystick.init()
             self.joystick.connect()
+        elif event.type == pygame.JOYBUTTONDOWN:
+            # Handle the button press
+            camera_button_min = 6
+            camera_button_max = 8
+            play_sound_button = 9
+            if camera_button_min <= event.button <= camera_button_max:
+                send_obj(self.client_sock, SetCameraCommand(event.button - camera_button_min))
+            elif event.button == play_sound_button:
+                send_obj(self.client_sock, PlaySoundCommand('/home/rov/obs_release.wav'))
         elif event.type == pygame.QUIT:
             # Window close requested, exit
             raise SystemExit
