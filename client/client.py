@@ -1,4 +1,5 @@
 import socket
+from typing import List
 
 import serial
 
@@ -14,18 +15,19 @@ from common.timer import Timer
 
 
 class Client:
-    def __init__(self, host: str, port: int, arduino: Arduino, camera_stream: CameraStream, sock_timeout: float = 0.5,
-                 reconnect_delay: float = 1.0, send_system_info_interval: float = 1.0) -> None:
+    def __init__(self, host: str, port: int, arduino: Arduino, camera_streams: List[CameraStream],
+                 sock_timeout: float = 0.5, reconnect_delay: float = 1.0, system_info_interval: float = 1.0) -> None:
         self.host = host
         self.port = port
         self.arduino = arduino
-        self.camera_stream = camera_stream
+        self.camera_streams = camera_streams
+        self.active_camera_stream = camera_streams[0]
 
         self.sound_player = SoundPlayer()
 
         self.sock_timeout = sock_timeout
         self.reconnect_delay = reconnect_delay
-        self.send_system_info_interval = send_system_info_interval
+        self.system_info_interval = system_info_interval
 
         self.sock = None
 
@@ -41,7 +43,7 @@ class Client:
             return
         logging.info("Connected to server")
         # Initialize timer to periodically send a SystemInfoMessage
-        send_system_info_timer = Timer(self.send_system_info_interval, start_expired=True)
+        send_system_info_timer = Timer(self.system_info_interval, start_expired=True)
         try:
             # Inform the server of the current state of the Arduino connection
             send_obj(self.sock, ArduinoConnectionMessage(self.arduino.is_connected()))
@@ -82,7 +84,11 @@ class Client:
                     self.arduino.disconnect()
                     send_obj(self.sock, ArduinoConnectionMessage(False))
         elif isinstance(command, SetCameraCommand):  # Server requested new camera index
-            self.camera_stream.set_source(command.camera_index)
+            # Set the currently playing camera stream to PAUSED
+            self.active_camera_stream.set_paused()
+            # Set the the new camera stream to PLAYING
+            self.active_camera_stream = self.camera_streams[command.camera_index]
+            self.active_camera_stream.set_playing()
         elif isinstance(command, PlaySoundCommand):  # Server requested that a sound be played
             # Stop the currently playing sound, if any
             self.sound_player.stop()

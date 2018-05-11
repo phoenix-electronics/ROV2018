@@ -13,14 +13,27 @@ if __name__ == '__main__':
     gst_port = int(os.getenv('GST_PORT', '5000'))
     arduino_port = os.getenv('ARDUINO_PORT')
 
-    # Initialize Arduino connection and video stream
+    # Initialize Arduino connection
     arduino = Arduino(arduino_port)
-    camera_stream = CameraStream(host, gst_port)
     arduino.connect()
-    camera_stream.set_source(0)
+
+    # Initialize camera streams
+    camera_stream_settings = [
+        ('/dev/video0', CameraStream.RESOLUTION_720),
+        ('/dev/video1', CameraStream.RESOLUTION_720),
+        ('/dev/video2', CameraStream.RESOLUTION_480)
+    ]
+    camera_streams = [CameraStream(settings[0], settings[1], host, gst_port) for settings in camera_stream_settings]
+
+    # Set camera streams to PAUSED so that they are ready to send video
+    for stream in camera_streams:
+        stream.set_paused()
+
+    # Set the first camera stream to PLAYING
+    camera_streams[0].set_playing()
 
     # Create and run client
-    client = Client(host, port, arduino, camera_stream)
+    client = Client(host, port, arduino, camera_streams)
     while True:
         client.connect_and_run()
         sleep(client.reconnect_delay)
