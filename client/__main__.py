@@ -19,11 +19,12 @@ if __name__ == '__main__':
 
     # Initialize camera streams
     camera_stream_settings = [
-        ('/dev/video0', CameraStream.RESOLUTION_720),
-        ('/dev/video1', CameraStream.RESOLUTION_720),
-        ('/dev/video2', CameraStream.RESOLUTION_480)
+        ('/dev/video0', (1280, 720), 30),
+        ('/dev/video1', (1280, 720), 30),
+        ('/dev/video2', (640, 480), 30)
     ]
-    camera_streams = [CameraStream(settings[0], settings[1], host, gst_port) for settings in camera_stream_settings]
+    camera_streams = [CameraStream(settings[0], settings[1], settings[2], host, gst_port)
+                      for settings in camera_stream_settings]
 
     # Set camera streams to PAUSED so that they are ready to send video
     for stream in camera_streams:
