@@ -30,11 +30,14 @@ if __name__ == '__main__':
     for stream in camera_streams:
         stream.set_paused()
 
+    # Create the client
+    client = Client(host, port, arduino, camera_streams)
+
     # Set the first camera stream to PLAYING
     camera_streams[0].set_playing()
+    client.active_camera_stream = camera_streams[0]
 
-    # Create and run client
-    client = Client(host, port, arduino, camera_streams)
+    # Run the client
     while True:
         client.connect_and_run()
         sleep(client.reconnect_delay)

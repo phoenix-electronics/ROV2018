@@ -21,7 +21,7 @@ class Client:
         self.port = port
         self.arduino = arduino
         self.camera_streams = camera_streams
-        self.active_camera_stream = camera_streams[0]
+        self.active_camera_stream = None
 
         self.sound_player = SoundPlayer()
 
