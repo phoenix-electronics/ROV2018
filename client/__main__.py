@@ -6,18 +6,18 @@ from client.camera_stream import CameraStream
 from client.client import Client
 
 if __name__ == '__main__':
-    # Read configuration details from environment
+    # Read configuration details from the environment
     host = os.getenv('HOST', 'localhost')
     port = int(os.getenv('PORT', '1234'))
 
     gst_port = int(os.getenv('GST_PORT', '5000'))
     arduino_port = os.getenv('ARDUINO_PORT')
 
-    # Initialize Arduino connection
+    # Initialize the Arduino connection
     arduino = Arduino(arduino_port)
     arduino.connect()
 
-    # Initialize camera streams
+    # Initialize the camera streams
     camera_stream_settings = [
         ('/dev/video0', (1280, 720), 30),
         ('/dev/video1', (1280, 720), 30),
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     camera_streams = [CameraStream(settings[0], settings[1], settings[2], host, gst_port)
                       for settings in camera_stream_settings]
 
-    # Set camera streams to PAUSED so that they are ready to send video
+    # Set the camera streams to PAUSED so that they are ready to send video
     for stream in camera_streams:
         stream.set_paused()
 

@@ -9,7 +9,7 @@ from server.server import Server
 from server.window import Window
 
 if __name__ == '__main__':
-    # Read configuration details from environment
+    # Read configuration details from the environment
     host = os.getenv('HOST', 'localhost')
     port = int(os.getenv('PORT', '1234'))
 
@@ -18,14 +18,14 @@ if __name__ == '__main__':
     # Initialize Pygame
     pygame.init()
 
-    # Start a Pygame timer to read the joystick's axes (if connected) every 50ms
+    # Start a Pygame timer to read the joystick's axes every 50ms
     pygame.time.set_timer(events.READ_JOYSTICK, 50)
 
     if enable_joystick_hotplug:
-        # Start a Pygame timer to reinitialize the joystick module to check for changes every 1000ms
+        # Start a Pygame timer to shutdown and reinitialize the joystick system every 1000ms
         pygame.time.set_timer(events.CHECK_JOYSTICK, 1000)
 
-    # Initialize joystick and window
+    # Initialize the joystick and window
     joystick = Joystick()
     window = Window()
     joystick.connect()
@@ -36,7 +36,7 @@ if __name__ == '__main__':
         logging.warn('Joystick not detected and ENABLE_JOYSTICK_HOTPLUG is not set!')
         logging.warn('Connect a joystick and restart the program to fix this.')
 
-    # Create and run server
+    # Create and run the server
     server = Server(host, port, joystick, window)
     try:
         server.run()

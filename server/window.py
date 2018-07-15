@@ -1,7 +1,5 @@
 import pygame
 
-from common import logging
-
 
 class Window:
     def __init__(self) -> None:

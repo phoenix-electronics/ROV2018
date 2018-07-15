@@ -24,7 +24,7 @@ class SetCameraCommand:
 
 
 class PlaySoundCommand:
-    """Stop the currently playing sound (if any), and play a new sound"""
+    """Stop the currently playing sound (if any), and optionally play a new sound"""
 
     def __init__(self, filename: Optional[str], vol_mb: int = 0, amp_mb: int = 0) -> None:
         self.filename = filename

@@ -15,15 +15,15 @@ class CameraStream:
         self._pipeline = self._create_pipeline(source, resolution, framerate, host, port)
 
     def set_playing(self) -> None:
-        """Sets the video stream state to PLAYING"""
+        """Set the video stream state to PLAYING"""
         self._pipeline.set_state(Gst.State.PLAYING)
 
     def set_paused(self) -> None:
-        """Sets the video stream state to PAUSED"""
+        """Set the video stream state to PAUSED"""
         self._pipeline.set_state(Gst.State.PAUSED)
 
     def set_stopped(self) -> None:
-        """Sets the video stream state to NULL"""
+        """Set the video stream state to NULL"""
         self._pipeline.set_state(Gst.State.NULL)
 
     @staticmethod

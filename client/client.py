@@ -41,7 +41,7 @@ class Client:
             logging.error('Unable to connect: {} (retrying in {}s)', err, self.RECONNECT_DELAY)
             return
         logging.info("Connected to server")
-        # Initialize timer to periodically send a SystemInfoMessage
+        # Initialize a timer to periodically send a SystemInfoMessage
         send_system_info_timer = Timer(self.SYSTEM_INFO_INTERVAL, start_expired=True)
         try:
             # Inform the server of the current state of the Arduino connection
@@ -51,7 +51,7 @@ class Client:
                 if send_system_info_timer.is_expired():
                     send_obj(self.sock, get_system_info_message())
                     send_system_info_timer.restart()
-                # Receive and handle command
+                # Receive and handle a command
                 command = recv_obj(self.sock, self.SOCKET_TIMEOUT)
                 self.handle_command(command)
         except socket.error as err:
@@ -68,7 +68,7 @@ class Client:
             self.sound_player.stop()
 
     def handle_command(self, command: object) -> None:
-        """Handle command from the server"""
+        """Handle a command from the server"""
         if isinstance(command, SetMotorSpeedsCommand):  # Server requested new motor speeds
             # Try and connect to the Arduino if it is not connected
             if not self.arduino.is_connected() and self.arduino.connect():

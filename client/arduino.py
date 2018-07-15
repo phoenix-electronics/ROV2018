@@ -38,7 +38,7 @@ class Arduino:
         """Write target motor speeds to the Arduino, raising serial.SerialException if the write fails"""
         if motor_speeds is None:
             motor_speeds = (1500, 1500, 1500, 1500, 1500, 1500, 0)
-        data = '!{},{},{},{},{},{},{};\n'.format(*motor_speeds)
+        data = '!{},{},{},{},{},{},{}\n'.format(*motor_speeds)
         self.connection.write(data.encode())
 
     def disconnect(self) -> None:
