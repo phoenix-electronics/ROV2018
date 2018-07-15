@@ -40,4 +40,4 @@ if __name__ == '__main__':
     # Run the client
     while True:
         client.connect_and_run()
-        sleep(client.reconnect_delay)
+        sleep(client.RECONNECT_DELAY)

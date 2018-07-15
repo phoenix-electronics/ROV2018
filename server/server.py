@@ -13,10 +13,11 @@ from server.window import Window
 
 
 class Server:
-    def __init__(self, host: str, port: int, joystick: Joystick, window: Window, sock_timeout: float = 0.5) -> None:
+    SOCKET_TIMEOUT = 0.5
+
+    def __init__(self, host: str, port: int, joystick: Joystick, window: Window) -> None:
         self.host = host
         self.port = port
-        self.sock_timeout = sock_timeout
 
         self.joystick = joystick
         self.window = window
@@ -30,7 +31,7 @@ class Server:
         try:
             # Create and bind the server socket
             self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_sock.settimeout(self.sock_timeout)
+            self.server_sock.settimeout(self.SOCKET_TIMEOUT)
             self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server_sock.bind((self.host, self.port))
             self.server_sock.listen(1)
@@ -57,7 +58,7 @@ class Server:
                 self.window.update()
                 # Receive and handle a message from the client, if one is available
                 if recv_avail(self.client_sock):
-                    message = recv_obj(self.client_sock, self.sock_timeout)
+                    message = recv_obj(self.client_sock, self.SOCKET_TIMEOUT)
                     self.handle_message(message)
         except socket.error as err:
             logging.error('Client disconnected: {}', err)
