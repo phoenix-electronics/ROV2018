@@ -1,16 +1,34 @@
+// The baud rate to use for serial communication
+// This should match BAUD_RATE in client/arduino.py
 #define SERIAL_BAUDRATE 57600
 
+// The numbers of the pins that the motor ESCs are connected to
+// These should reflect the configuration in server/motor_vectoring.py
 #define MOTOR_PINS 6, 7, 2, 3, 4, 5
+// Whether the speeds for each motor ESC should be 'flipped' prior to sending
+// When enabled, forwards will become backwards for that motor and vice-versa
+// This is especially useful when some of the motors are wired backwards
 #define MOTOR_FLIP 1, 1, 1, 1, 0, 1
 
+// The numbers of the pins that the ULN2003 driver board is connected to
 #define STEPPER_PINS 8, 9, 10, 11
+// The speed to run the stepper motor at, in rotations per minute (RPM)
 #define STEPPER_RPM 22
 
+// The maximum time to wait for a command via serial, in milliseconds
 #define COMMAND_TIMEOUT 250
+// The size of the command buffer, in bytes
+// Note that one byte is reserved for the null terminator ('\0')
 #define COMMAND_BUFSIZE 128
 
+// The 'OFF' pulse width for the motor ESCs, in microseconds
+// At this value, the motors are completely stopped
 #define MOTORS_OFF 1500
+// The minimum pulse width recognized by the motor ESCs, in microseconds
+// At this value, the motors are driven at full speed forwards
 #define MOTORS_MIN 1100
+// The maximum pulse width recognized by the motor ESCs, in microseconds
+// At this value, the motors are driven at full speed backwards
 #define MOTORS_MAX 1900
 
 #include <Servo.h>
