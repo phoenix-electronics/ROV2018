@@ -1,5 +1,7 @@
 import pygame
 
+from server.widget import Widget
+
 
 class Window:
     def __init__(self) -> None:
@@ -16,7 +18,7 @@ class Window:
 
     def update(self) -> None:
         """Update the contents of the window"""
-        self.surface.fill((0, 0, 0))
+        self.surface.fill(Widget.DEFAULT_BG_COLOR)
         pygame.display.flip()
 
     def hide(self) -> None:
