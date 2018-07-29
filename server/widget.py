@@ -1,7 +1,11 @@
 from math import ceil
-from typing import Tuple, List
+from typing import Dict, List, Tuple
 
 import pygame
+
+Vec2D = Tuple[int, int]
+
+"""Widgets are UI elements that can be rendered to a PyGame Surface"""
 
 
 class Widget:
@@ -10,13 +14,15 @@ class Widget:
     DEFAULT_FG_COLOR = (255, 255, 255)
     DEFAULT_BG_COLOR = (0, 0, 0)
 
-    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], children: List['Widget'] = None) -> None:
+    def __init__(self, pos: Vec2D, size: Vec2D, children: List['Widget'] = None, name: str = None) -> None:
         self.pos = pos
         self.size = size
+        self.children = children if children is not None else []
+        self.name = name
+
         self.color = self.DEFAULT_FG_COLOR
         self.visible = True
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
-        self.children = children if children is not None else []
 
     def blit(self, surface: pygame.Surface) -> None:
         """Recursively draw the widget and its children, and blit the result onto the provided surface"""
@@ -27,13 +33,22 @@ class Widget:
                 child.blit(self.surface)
             surface.blit(self.surface, self.pos)
 
+    def get_name_dict(self) -> Dict[str, 'Widget']:
+        """Recursively search for named widgets, returning a dictionary indexed by name"""
+        name_dict = {}
+        if self.name:
+            name_dict[self.name] = self
+        for child in self.children:
+            name_dict.update(child.get_name_dict())
+        return name_dict
+
     def _scx(self, x: float, margin: int = 0) -> int:
         return int((self.size[0] - 1 - margin * 2) * x) + margin
 
     def _scy(self, y: float, margin: int = 0) -> int:
         return int((self.size[1] - 1 - margin * 2) * y) + margin
 
-    def _sc(self, x: float, y: float, margin: int = 0) -> Tuple[int, int]:
+    def _sc(self, x: float, y: float, margin: int = 0) -> Vec2D:
         return self._scx(x, margin), self._scy(y, margin)
 
     def draw(self) -> None:
@@ -46,8 +61,8 @@ class VerticalLayoutWidget(Widget):
 
     ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT = range(3)
 
-    def __init__(self, pos: Tuple[int, int], children: [Widget], alignment: int = ALIGN_CENTER,
-                 spacing: int = 0) -> None:
+    def __init__(self, pos: Vec2D, children: [Widget], alignment: int = ALIGN_LEFT, spacing: int = 4,
+                 name: str = None) -> None:
         width, height = 0, 0
         if children:
             widths, heights = zip(*[child.size for child in children])
@@ -57,7 +72,7 @@ class VerticalLayoutWidget(Widget):
                 x_offset = [0, (width - widths[index]) // 2, width - widths[index]][alignment]
                 child.pos = (x_offset, y_offset)
                 y_offset += heights[index] + spacing
-        super().__init__(pos, (width, height), children=children)
+        super().__init__(pos, (width, height), children=children, name=name)
 
 
 class HorizontalLayoutWidget(Widget):
@@ -65,8 +80,8 @@ class HorizontalLayoutWidget(Widget):
 
     ALIGN_TOP, ALIGN_MIDDLE, ALIGN_BOTTOM = range(3)
 
-    def __init__(self, pos: Tuple[int, int], children: [Widget], alignment: int = ALIGN_MIDDLE,
-                 spacing: int = 0) -> None:
+    def __init__(self, pos: Vec2D, children: [Widget], alignment: int = ALIGN_TOP, spacing: int = 4,
+                 name: str = None) -> None:
         width, height = 0, 0
         if children:
             widths, heights = zip(*[child.size for child in children])
@@ -76,17 +91,19 @@ class HorizontalLayoutWidget(Widget):
                 y_offset = [0, (height - heights[index]) // 2, height - heights[index]][alignment]
                 child.pos = (x_offset, y_offset)
                 x_offset += widths[index] + spacing
-        super().__init__(pos, (width, height), children=children)
+        super().__init__(pos, (width, height), children=children, name=name)
 
 
 class BorderLayoutWidget(Widget):
     """Widget that lays out its children in top, left, right, bottom, and center positions"""
 
-    def __init__(self, pos: Tuple[int, int], top: Widget = None, right: Widget = None, bottom: Widget = None,
-                 left: Widget = None, center: Widget = None, spacing: int = 0) -> None:
-        h_widget = HorizontalLayoutWidget((0, 0), list(filter(None, (left, center, right))), spacing=spacing)
-        v_widget = VerticalLayoutWidget((0, 0), list(filter(None, (top, h_widget, bottom))), spacing=spacing)
-        super().__init__(pos, v_widget.size, children=[v_widget])
+    def __init__(self, pos: Vec2D, top: Widget = None, right: Widget = None, bottom: Widget = None, left: Widget = None,
+                 center: Widget = None, spacing: int = 4, name: str = None) -> None:
+        h_widget = HorizontalLayoutWidget((0, 0), list(filter(None, (left, center, right))),
+                                          alignment=HorizontalLayoutWidget.ALIGN_MIDDLE, spacing=spacing)
+        v_widget = VerticalLayoutWidget((0, 0), list(filter(None, (top, h_widget, bottom))),
+                                        alignment=VerticalLayoutWidget.ALIGN_CENTER, spacing=spacing)
+        super().__init__(pos, v_widget.size, children=[v_widget], name=name)
 
 
 class TextWidget(Widget):
@@ -98,14 +115,14 @@ class TextWidget(Widget):
 
     _loaded_fonts = {}
 
-    def __init__(self, pos: Tuple[int, int], text: str, font: Tuple[str, int] = FONT_MD) -> None:
+    def __init__(self, pos: Vec2D, text: str, font: Tuple[str, int] = FONT_MD, name: str = None) -> None:
         if font not in self._loaded_fonts:
             self._loaded_fonts[font] = pygame.font.SysFont(*font)
         self.font = self._loaded_fonts[font]
         self.text = text
         self._text = None
         self.text_surface = None
-        super().__init__(pos, self.font.size(text))
+        super().__init__(pos, self.font.size(text), name=name)
 
     def draw(self) -> None:
         if self.text != self._text:
@@ -119,10 +136,10 @@ class GlyphWidget(Widget):
 
     GLYPH_NONE, GLYPH_ERROR, GLYPH_SQUARE = range(3)
 
-    def __init__(self, pos: Tuple[int, int], size: int, glyph: int, margin: int = 0) -> None:
+    def __init__(self, pos: Vec2D, size: int, glyph: int, margin: int = 0, name: str = None) -> None:
         self.glyph = glyph
         self.margin = margin
-        super().__init__(pos, (size, size))
+        super().__init__(pos, (size, size), name=name)
 
     def draw(self) -> None:
         glyph, margin, surface, color = self.glyph, self.margin, self.surface, self.color
@@ -139,8 +156,8 @@ class BarWidget(Widget):
 
     FROM_TOP, FROM_RIGHT, FROM_BOTTOM, FROM_LEFT = range(4)
 
-    def __init__(self, pos: Tuple[int, int], size: Tuple[int, int], direction: int = FROM_LEFT,
-                 border: Tuple[bool, bool, bool, bool] = None, margin: int = 2) -> None:
+    def __init__(self, pos: Vec2D, size: Vec2D, direction: int = FROM_LEFT,
+                 border: Tuple[bool, bool, bool, bool] = None, margin: int = 2, name: str = None) -> None:
         self.direction = direction
         self.border = [(True, False) * 2, (False, True) * 2][direction % 2] if border is None else border
         self.margin = tuple([int(b) * margin for b in self.border])
@@ -148,7 +165,7 @@ class BarWidget(Widget):
         glyph_size = min(*size)
         glyph_x, glyph_y = (size[0] - glyph_size) // 2, (size[1] - glyph_size) // 2
         self.glyph = GlyphWidget((glyph_x, glyph_y), glyph_size, GlyphWidget.GLYPH_ERROR)
-        super().__init__(pos, size, [self.glyph])
+        super().__init__(pos, size, [self.glyph], name=name)
 
     def draw(self) -> None:
         surface, color, direction, margin, value = self.surface, self.color, self.direction, self.margin, self.value
@@ -172,16 +189,13 @@ class BarWidget(Widget):
 class LabeledContainerWidget(Widget):
     """Widget that displays a child widget with a title bar"""
 
-    def __init__(self, pos: Tuple[int, int], child: Widget, text: str, padding: int = 4) -> None:
+    def __init__(self, pos: Vec2D, width: int, child: Widget, text: str, padding: int = 4, name: str = None) -> None:
         self.label = TextWidget((5, 2), text, TextWidget.FONT_SM)
         self.label.color = self.DEFAULT_BG_COLOR
         self.padding = padding
-        label_w, label_h = self.label.size
-        child_w, child_h = child.size
-        child.pos = (padding, label_h + 4 + padding)
-        width = max(label_w + 8, child_w + 2 * padding)
-        height = label_h + 4 + child_h + 2 * padding
-        super().__init__(pos, (width, height), children=[self.label, child])
+        child.pos = (padding, self.label.size[1] + 4 + padding)
+        height = self.label.size[1] + 4 + child.size[1] + 2 * padding
+        super().__init__(pos, (width, height), children=[self.label, child], name=name)
 
     def draw(self) -> None:
         surface, color = self.surface, self.color
