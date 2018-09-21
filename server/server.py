@@ -79,8 +79,8 @@ class Server:
     def handle_event(self, event: pygame.event.EventType) -> None:
         """Handle a Pygame event"""
         if event.type == events.READ_JOYSTICK:
-            # Read the joystick's axes if it is connected
-            joystick_data = self.joystick.read_values() if self.joystick.is_connected() else None
+            # Read data from the joystick if it is connected
+            joystick_data = self.joystick.read_all() if self.joystick.is_connected() else None
             # TODO: Update self.window
             # Calculate and send new motor speeds to the client if it is connected
             if self.client_sock is not None:

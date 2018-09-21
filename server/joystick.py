@@ -27,7 +27,7 @@ class Joystick:
         if pygame.joystick.get_count() > 0:
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
-            self.read_values()
+            self.read_all()
             return True
         return False
 
@@ -36,8 +36,8 @@ class Joystick:
         self.joystick.quit()
         self.joystick = None
 
-    def read_values(self) -> JoystickData:
-        """Read the values of the joystick's axes, buttons, and hat, and return a JoystickData"""
+    def read_all(self) -> JoystickData:
+        """Read the values of the joystick's axes, buttons, and hat, returning a JoystickData"""
         axes = [self.joystick.get_axis(i) for i in range(self.joystick.get_numaxes())]
         buttons = [self.joystick.get_button(i) for i in range(self.joystick.get_numbuttons())]
         hat = self.joystick.get_hat(0)
