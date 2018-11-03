@@ -1,4 +1,4 @@
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, DEVNULL
 from typing import Optional
 
 import psutil
@@ -15,7 +15,7 @@ def get_cpu_temp() -> Optional[float]:
     """Return the current CPU temperature (if available) in degrees celsius"""
     # TODO: Use psutil to detect temperature when not running on a Raspberry Pi
     try:
-        temp_str = check_output(['sudo', '-n', '/opt/vc/bin/vcgencmd', 'measure_temp'])
+        temp_str = check_output(['sudo', '-n', '/opt/vc/bin/vcgencmd', 'measure_temp'], stderr=DEVNULL)
         return float(temp_str.replace(b'temp=', b'').replace(b'\'C', b''))
     except (OSError, CalledProcessError, ValueError):
         pass
