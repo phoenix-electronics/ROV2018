@@ -13,6 +13,8 @@ if __name__ == '__main__':
     host = os.getenv('HOST', 'localhost')
     port = int(os.getenv('PORT', '1234'))
 
+    joystick_index = int(os.getenv('JOYSTICK_INDEX', '0'))
+
     enable_joystick_hotplug = os.getenv('ENABLE_JOYSTICK_HOTPLUG') is not None
 
     # Initialize Pygame
@@ -26,7 +28,7 @@ if __name__ == '__main__':
         pygame.time.set_timer(events.CHECK_JOYSTICK, 1000)
 
     # Initialize the joystick and window
-    joystick = Joystick()
+    joystick = Joystick(joystick_index)
     window = Window()
     joystick.connect()
     window.show()

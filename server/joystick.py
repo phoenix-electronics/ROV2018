@@ -15,7 +15,8 @@ class JoystickData:
 class Joystick:
     """Wrapper for a Pygame joystick connection"""
 
-    def __init__(self) -> None:
+    def __init__(self, index: int) -> None:
+        self.index = index
         self.joystick = None
 
     def is_connected(self) -> bool:
@@ -24,8 +25,8 @@ class Joystick:
 
     def connect(self) -> bool:
         """Attempt to connect to the joystick"""
-        if pygame.joystick.get_count() > 0:
-            self.joystick = pygame.joystick.Joystick(0)
+        if pygame.joystick.get_count() > self.index:
+            self.joystick = pygame.joystick.Joystick(self.index)
             self.joystick.init()
             self.read_all()
             return True
