@@ -4,8 +4,11 @@
 ## This script builds and uploads `arduino/arduino.ino` to the connected board.
 ##
 
+## Arduino serial port.
 export ARDUINO_PORT=/dev/ttyUSB0
+## Arduino FQBN (Fully Qualified Board Name).
 export ARDUINO_FQBN=arduino:avr:nano:cpu=atmega328
+
 
 echo "----------------"
 echo "ARDUINO_PORT=$ARDUINO_PORT"
