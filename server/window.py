@@ -1,11 +1,12 @@
 import pygame
 
-from common import logging
+from server.widget import VerticalLayoutWidget, Widget
 
 
 class Window:
     def __init__(self) -> None:
         self.surface = None
+        self.widgets = VerticalLayoutWidget((4, 4), children=[], name='root').get_name_dict()
 
     def show(self) -> None:
         """Show the window"""
@@ -14,11 +15,13 @@ class Window:
         self.update()
 
     def is_showing(self) -> bool:
+        """Return whether the window is showing"""
         return self.surface is not None
 
     def update(self) -> None:
         """Update the contents of the window"""
-        self.surface.fill((0, 0, 0))
+        self.surface.fill(Widget.DEFAULT_BG_COLOR)
+        self.widgets.get('root').blit(self.surface)
         pygame.display.flip()
 
     def hide(self) -> None:

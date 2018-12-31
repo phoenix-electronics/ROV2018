@@ -13,30 +13,30 @@ def _fmt_log_msg(lvl: str, fmt: str, *fmt_args) -> str:
 
 
 def debug(fmt, *fmt_args) -> None:
-    """Format and log a message with severity DEBUG"""
+    """Format and log a message with level DEBUG"""
     if MIN_LEVEL <= LVL_DEBUG:
         print(_fmt_log_msg('DEBUG', fmt, *fmt_args))
 
 
 def info(fmt, *fmt_args) -> None:
-    """Format and log a message with severity INFO"""
+    """Format and log a message with level INFO"""
     if MIN_LEVEL <= LVL_INFO:
         print(_fmt_log_msg('INFO', fmt, *fmt_args))
 
 
 def warn(fmt, *fmt_args) -> None:
-    """Format and log a message with severity WARN"""
+    """Format and log a message with level WARN"""
     if MIN_LEVEL <= LVL_WARN:
         print(_fmt_log_msg('WARN', fmt, *fmt_args), file=sys.stderr)
 
 
 def error(fmt, *fmt_args) -> None:
-    """Format and log a message with severity ERROR"""
+    """Format and log a message with level ERROR"""
     if MIN_LEVEL <= LVL_ERROR:
         print(_fmt_log_msg('ERROR', fmt, *fmt_args), file=sys.stderr)
 
 
 def fatal(fmt, *fmt_args) -> None:
-    """Format and log a message with severity FATAL"""
+    """Format and log a message with level FATAL"""
     if MIN_LEVEL <= LVL_FATAL:
         print(_fmt_log_msg('FATAL', fmt, *fmt_args), file=sys.stderr)

@@ -11,7 +11,7 @@ class Timer:
             self.start_time -= self.duration
 
     def is_expired(self) -> bool:
-        """Return whether the timer is expired"""
+        """Return whether the timer has expired"""
         return self.get_remaining_time() == 0
 
     def get_elapsed_time(self) -> float:
@@ -23,9 +23,9 @@ class Timer:
         return max(self.duration - self.get_elapsed_time(), 0)
 
     def wait(self) -> None:
-        """Block until the timer expires"""
+        """Block the current thread until the timer expires"""
         sleep(self.get_remaining_time())
 
     def restart(self) -> None:
-        """Reset the timer"""
+        """Restart the timer"""
         self.start_time = perf_counter()

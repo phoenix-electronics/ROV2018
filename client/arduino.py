@@ -7,10 +7,11 @@ from serial.tools import list_ports
 class Arduino:
     """Wrapper for a serial connection to an Arduino"""
 
-    def __init__(self, port: str = None, baud_rate: int = 57600, write_timeout: float = 0.05) -> None:
+    BAUD_RATE = 57600
+    WRITE_TIMEOUT = 0.05
+
+    def __init__(self, port: str = None) -> None:
         self.port = port
-        self.baud_rate = baud_rate
-        self.write_timeout = write_timeout
         self.connection = None
 
     def is_connected(self) -> bool:
@@ -23,8 +24,8 @@ class Arduino:
         if port is not None:
             self.connection = serial.Serial()
             self.connection.port = port
-            self.connection.baudrate = self.baud_rate
-            self.connection.writeTimeout = self.write_timeout
+            self.connection.baudrate = self.BAUD_RATE
+            self.connection.writeTimeout = self.WRITE_TIMEOUT
             self.connection.dtr = False
             try:
                 self.connection.open()
@@ -37,7 +38,7 @@ class Arduino:
         """Write target motor speeds to the Arduino, raising serial.SerialException if the write fails"""
         if motor_speeds is None:
             motor_speeds = (1500, 1500, 1500, 1500, 1500, 1500, 0)
-        data = '!{},{},{},{},{},{},{};\n'.format(*motor_speeds)
+        data = '!{},{},{},{},{},{},{}\n'.format(*motor_speeds)
         self.connection.write(data.encode())
 
     def disconnect(self) -> None:

@@ -45,7 +45,7 @@ def calculate_motor_speeds(joystick_data: JoystickData) -> Tuple[int, int, int, 
     h_motor_speeds_max = max(max(map(abs, h_motor_speeds)), 1)
     h_motor_speeds = [speed / h_motor_speeds_max for speed in h_motor_speeds]
 
-    # Combine and scale the motor speeds
+    # Convert the speeds ([-1.0, 1.0]) to values for the ESCs ([1100, 1900])
     motor_speeds = [int(1500 + speed * 400) for speed in h_motor_speeds + v_motor_speeds]
 
     # Append the camera rotation speed

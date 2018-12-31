@@ -1,4 +1,7 @@
+from typing import Tuple
+
 import gi
+
 gi.require_version('Gst', '1.0')  # noqa
 from gi.repository import Gst
 
@@ -8,25 +11,24 @@ Gst.init(None)
 class CameraStream:
     """Wrapper for a GStreamer V4L2 video stream"""
 
-    def __init__(self, host: str, port: int) -> None:
-        self.host = host
-        self.port = port
-        self.source = None
-        self.pipeline = None
+    def __init__(self, source: str, resolution: Tuple[int, int], framerate: int, host: str, port: int) -> None:
+        self._pipeline = self._create_pipeline(source, resolution, framerate, host, port)
 
-    def set_source(self, camera_index: int) -> None:
-        """Set the source of the video stream, restarting the stream if necessary"""
-        source = '/dev/video{}'.format(camera_index)
-        if self.source != source:
-            self.source = source
-            self.restart()
+    def set_playing(self) -> None:
+        """Set the video stream state to PLAYING"""
+        self._pipeline.set_state(Gst.State.PLAYING)
 
-    def restart(self) -> None:
-        """Stop and restart the video stream"""
-        if self.pipeline:
-            self.pipeline.set_state(Gst.State.NULL)
-        pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width=640, height=480, framerate=30/1 ! ' \
+    def set_paused(self) -> None:
+        """Set the video stream state to PAUSED"""
+        self._pipeline.set_state(Gst.State.PAUSED)
+
+    def set_stopped(self) -> None:
+        """Set the video stream state to NULL"""
+        self._pipeline.set_state(Gst.State.NULL)
+
+    @staticmethod
+    def _create_pipeline(source: str, resolution: Tuple[int, int], framerate: int, host: str, port: int) -> Gst.Element:
+        pipeline_args = 'v4l2src device="{}" ! video/x-raw, format=I420, width={}, height={}, framerate={}/1 ! ' \
                         'jpegenc ! rtpjpegpay ! udpsink host="{}" port={}' \
-            .format(self.source, self.host, self.port)
-        self.pipeline = Gst.parse_launch(pipeline_args)
-        self.pipeline.set_state(Gst.State.PLAYING)
+            .format(source, resolution[0], resolution[1], framerate, host, port)
+        return Gst.parse_launch(pipeline_args)

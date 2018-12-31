@@ -1,8 +1,9 @@
 import socket
+from typing import List
 
 import serial
 
-import common.logging as logging
+from common import logging
 from client.arduino import Arduino
 from client.camera_stream import CameraStream
 from client.sound_player import SoundPlayer
@@ -14,18 +15,18 @@ from common.timer import Timer
 
 
 class Client:
-    def __init__(self, host: str, port: int, arduino: Arduino, camera_stream: CameraStream, sock_timeout: float = 0.5,
-                 reconnect_delay: float = 1.0, send_system_info_interval: float = 1.0) -> None:
+    SOCKET_TIMEOUT = 0.5
+    RECONNECT_DELAY = 1.0
+    SYSTEM_INFO_INTERVAL = 1.0
+
+    def __init__(self, host: str, port: int, arduino: Arduino, camera_streams: List[CameraStream]) -> None:
         self.host = host
         self.port = port
         self.arduino = arduino
-        self.camera_stream = camera_stream
+        self.camera_streams = camera_streams
+        self.active_camera_stream = None
 
         self.sound_player = SoundPlayer()
-
-        self.sock_timeout = sock_timeout
-        self.reconnect_delay = reconnect_delay
-        self.send_system_info_interval = send_system_info_interval
 
         self.sock = None
 
@@ -33,15 +34,15 @@ class Client:
         """Connect to the server and run the client"""
         logging.info('Connecting to server: {}:{}', self.host, self.port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(self.sock_timeout)
+        self.sock.settimeout(self.SOCKET_TIMEOUT)
         try:
             self.sock.connect((self.host, self.port))
         except socket.error as err:
-            logging.error('Unable to connect: {} (retrying in {}s)', err, self.reconnect_delay)
+            logging.error('Unable to connect: {} (retrying in {}s)', err, self.RECONNECT_DELAY)
             return
         logging.info("Connected to server")
-        # Initialize timer to periodically send a SystemInfoMessage
-        send_system_info_timer = Timer(self.send_system_info_interval, start_expired=True)
+        # Initialize a timer to periodically send a SystemInfoMessage
+        send_system_info_timer = Timer(self.SYSTEM_INFO_INTERVAL, start_expired=True)
         try:
             # Inform the server of the current state of the Arduino connection
             send_obj(self.sock, ArduinoConnectionMessage(self.arduino.is_connected()))
@@ -50,11 +51,11 @@ class Client:
                 if send_system_info_timer.is_expired():
                     send_obj(self.sock, get_system_info_message())
                     send_system_info_timer.restart()
-                # Receive and handle command
-                command = recv_obj(self.sock, self.sock_timeout)
+                # Receive and handle a command
+                command = recv_obj(self.sock, self.SOCKET_TIMEOUT)
                 self.handle_command(command)
         except socket.error as err:
-            logging.error('Connection closed: {} (reconnecting in {}s)', err, self.reconnect_delay)
+            logging.error('Connection closed: {} (reconnecting in {}s)', err, self.RECONNECT_DELAY)
         finally:
             self.sock.close()
             # If the Arduino is connected, try and stop the motors
@@ -67,7 +68,8 @@ class Client:
             self.sound_player.stop()
 
     def handle_command(self, command: object) -> None:
-        """Handle command from the server"""
+        """Handle a command from the server"""
+        logging.debug('Server command: {}', command)
         if isinstance(command, SetMotorSpeedsCommand):  # Server requested new motor speeds
             # Try and connect to the Arduino if it is not connected
             if not self.arduino.is_connected() and self.arduino.connect():
@@ -82,7 +84,11 @@ class Client:
                     self.arduino.disconnect()
                     send_obj(self.sock, ArduinoConnectionMessage(False))
         elif isinstance(command, SetCameraCommand):  # Server requested new camera index
-            self.camera_stream.set_source(command.camera_index)
+            # Set the currently playing camera stream to PAUSED
+            self.active_camera_stream.set_paused()
+            # Set the the new camera stream to PLAYING
+            self.active_camera_stream = self.camera_streams[command.camera_index]
+            self.active_camera_stream.set_playing()
         elif isinstance(command, PlaySoundCommand):  # Server requested that a sound be played
             # Stop the currently playing sound, if any
             self.sound_player.stop()
