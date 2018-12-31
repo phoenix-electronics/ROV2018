@@ -69,6 +69,7 @@ class Client:
 
     def handle_command(self, command: object) -> None:
         """Handle a command from the server"""
+        logging.debug('Server command: {}', command)
         if isinstance(command, SetMotorSpeedsCommand):  # Server requested new motor speeds
             # Try and connect to the Arduino if it is not connected
             if not self.arduino.is_connected() and self.arduino.connect():

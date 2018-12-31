@@ -71,6 +71,7 @@ class Server:
 
     def handle_message(self, message: object) -> None:
         """Handle a message from the client"""
+        logging.debug('Client message: {}', message)
         if isinstance(message, ArduinoConnectionMessage):
             pass  # TODO: Update self.window
         elif isinstance(message, SystemInfoMessage):
